@@ -1,15 +1,16 @@
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
-import { steps, goals, userStats } from '@/lib/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { steps, goals } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
 import { updateUserStats } from '@/lib/stats/update-stats';
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
+    const { id } = await params;
 
     if (!userId) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -29,7 +30,7 @@ export async function PATCH(
 
     // Get the step and verify ownership
     const step = await db.query.steps.findFirst({
-      where: eq(steps.id, params.id),
+      where: eq(steps.id, id),
       with: {
         goal: true,
       },
@@ -49,7 +50,7 @@ export async function PATCH(
         status,
         completedAt: status === 'completed' ? new Date() : null,
       })
-      .where(eq(steps.id, params.id))
+      .where(eq(steps.id, id))
       .returning();
 
     // Update user stats if step was just completed
@@ -64,7 +65,7 @@ export async function PATCH(
       });
 
       const allCompleted = allSteps.every(s => 
-        s.id === params.id ? status === 'completed' : s.status === 'completed'
+        s.id === id ? status === 'completed' : s.status === 'completed'
       );
 
       if (allCompleted) {

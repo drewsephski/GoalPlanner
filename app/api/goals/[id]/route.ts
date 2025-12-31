@@ -5,10 +5,11 @@ import { eq, and } from 'drizzle-orm';
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
+    const { id } = await params;
 
     if (!userId) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -19,7 +20,7 @@ export async function GET(
 
     const goal = await db.query.goals.findFirst({
       where: and(
-        eq(goals.id, params.id),
+        eq(goals.id, id),
         eq(goals.userId, userId)
       ),
       with: {
@@ -54,10 +55,11 @@ export async function GET(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
+    const { id } = await params;
 
     if (!userId) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -72,7 +74,7 @@ export async function PATCH(
     // Verify ownership
     const goal = await db.query.goals.findFirst({
       where: and(
-        eq(goals.id, params.id),
+        eq(goals.id, id),
         eq(goals.userId, userId)
       ),
     });
@@ -113,7 +115,7 @@ export async function PATCH(
     const [updatedGoal] = await db
       .update(goals)
       .set(updateData)
-      .where(eq(goals.id, params.id))
+      .where(eq(goals.id, id))
       .returning();
 
     return new Response(JSON.stringify({ goal: updatedGoal }), {
@@ -134,10 +136,11 @@ export async function PATCH(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
+    const { id } = await params;
 
     if (!userId) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -149,7 +152,7 @@ export async function DELETE(
     // Verify ownership
     const goal = await db.query.goals.findFirst({
       where: and(
-        eq(goals.id, params.id),
+        eq(goals.id, id),
         eq(goals.userId, userId)
       ),
     });
@@ -162,7 +165,7 @@ export async function DELETE(
     }
 
     // Delete goal (cascade will delete steps)
-    await db.delete(goals).where(eq(goals.id, params.id));
+    await db.delete(goals).where(eq(goals.id, id));
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,

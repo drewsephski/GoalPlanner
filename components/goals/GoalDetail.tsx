@@ -38,7 +38,16 @@ interface Goal {
   deadline: string | null;
   timeCommitment: string | null;
   biggestConcern: string | null;
-  aiPlan: any;
+  aiPlan: {
+    overview: string;
+    steps: Array<{
+      title: string;
+      description: string;
+      order: number;
+    }>;
+    timeline: string;
+    tips: string[];
+  } | null;
   status: string;
   createdAt: Date;
   steps: Array<{
