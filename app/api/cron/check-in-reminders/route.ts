@@ -1,6 +1,5 @@
 import { sendDailyCheckInReminders } from '@/lib/email/check-in-reminders';
 
-export const runtime = 'edge';
 
 export async function GET(req: Request) {
   // Verify this is from a cron job (Vercel provides a secret)

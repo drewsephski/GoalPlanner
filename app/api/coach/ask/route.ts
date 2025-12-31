@@ -9,7 +9,6 @@ const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
 });
 
-export const runtime = 'edge';
 
 export async function POST(req: Request) {
   try {
