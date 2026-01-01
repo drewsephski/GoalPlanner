@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -231,8 +232,15 @@ export default async function HomePage() {
                             </div>
                         </div>
                     </div>
+
+                {/* Product Hunt Badge */}
+                <div className="mt-16 flex justify-center">
+                    <a href="https://www.producthunt.com/products/goalplanner?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-goalplanner" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+                        <img alt="GoalPlanner - Turn New Year's resolutions into reality with action plans. | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1056776&theme=light&t=1767239558716" />
+                    </a>
                 </div>
             </div>
         </div>
+    </div>
     );
 }
