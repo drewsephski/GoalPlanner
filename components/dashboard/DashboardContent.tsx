@@ -125,8 +125,8 @@ export function DashboardContent({ goals, stats }: DashboardContentProps) {
           <Card>
             <CardContent className="pt-4 sm:pt-6">
               <div className="flex items-center gap-2 sm:gap-3">
-                <div className="p-1.5 sm:p-2 bg-chart-1/10 rounded-lg">
-                  <Target className="h-4 w-4 sm:h-5 sm:w-5 text-chart-1" />
+                <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg">
+                  <Target className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
                 <div>
                   <p className="text-xl sm:text-2xl font-bold">{activeGoals.length}</p>
@@ -139,8 +139,8 @@ export function DashboardContent({ goals, stats }: DashboardContentProps) {
           <Card>
             <CardContent className="pt-4 sm:pt-6">
               <div className="flex items-center gap-2 sm:gap-3">
-                <div className="p-1.5 sm:p-2 bg-chart-2/10 rounded-lg">
-                  <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-chart-2" />
+                <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg">
+                  <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
                 <div>
                   <p className="text-xl sm:text-2xl font-bold">{stats.totalStepsCompleted}</p>

@@ -98,7 +98,7 @@ interface GoalDetailProps {
 
 export function GoalDetail({ goal, user }: GoalDetailProps) {
     const router = useRouter();
-    const [isUpdating, setIsUpdating] = useState(false);
+    const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
     const [expandedSteps, setExpandedSteps] = useState<Record<string, boolean | Array<{ title: string; description: string; estimatedTime: string }>>>({});
     const [subStepsCompletion, setSubStepsCompletion] = useState<Record<string, boolean>>({});
     const [activeTab, setActiveTab] = useState('steps');
@@ -155,7 +155,26 @@ export function GoalDetail({ goal, user }: GoalDetailProps) {
     };
 
     const handleStepStatusChange = async (stepId: string, newStatus: string) => {
-        setIsUpdating(true);
+        const oldStatus = localSteps.find(s => s.id === stepId)?.status;
+        
+        // Optimistic update - update UI immediately
+        setLocalSteps(prev => prev.map(step => 
+            step.id === stepId 
+                ? { ...step, status: newStatus, completedAt: newStatus === 'completed' ? new Date() : null }
+                : step
+        ));
+        
+        // Show success toast
+        if (newStatus === 'completed') {
+            toast.success('Step completed! Great job! 🎉');
+        } else if (newStatus === 'in_progress') {
+            toast.info('Step marked as in progress');
+        } else if (newStatus === 'skipped') {
+            toast.info('Step skipped');
+        } else {
+            toast.info('Step marked as pending');
+        }
+        
         try {
             const response = await fetch(`/api/steps/${stepId}`, {
                 method: 'PATCH',
@@ -163,13 +182,24 @@ export function GoalDetail({ goal, user }: GoalDetailProps) {
                 body: JSON.stringify({ status: newStatus }),
             });
 
-            if (!response.ok) throw new Error('Failed to update step status');
-
-            router.refresh();
+            if (!response.ok) {
+                // Revert optimistic update if API fails
+                setLocalSteps(prev => prev.map(step => 
+                    step.id === stepId 
+                        ? { ...step, status: oldStatus || 'pending', completedAt: oldStatus === 'completed' ? step.completedAt : null }
+                        : step
+                ));
+                throw new Error('Failed to update step status');
+            }
         } catch (error) {
+            // Revert optimistic update if API fails
+            setLocalSteps(prev => prev.map(step => 
+                step.id === stepId 
+                    ? { ...step, status: oldStatus || 'pending', completedAt: oldStatus === 'completed' ? step.completedAt : null }
+                    : step
+            ));
+            toast.error('Failed to update step status. Please try again.');
             console.error('Error updating step status:', error);
-        } finally {
-            setIsUpdating(false);
         }
     };
 
@@ -225,7 +255,21 @@ export function GoalDetail({ goal, user }: GoalDetailProps) {
     };
 
     const handleVisibilityChange = async (newVisibility: string) => {
-        setIsUpdating(true);
+        const oldVisibility = goal.visibility;
+        
+        // Set loading state
+        setIsUpdatingVisibility(true);
+        
+        // Optimistic update - update UI immediately
+        goal.visibility = newVisibility;
+        
+        // Show success toast
+        if (newVisibility === 'public') {
+            toast.success('Goal is now public! 🌍');
+        } else {
+            toast.info('Goal is now private');
+        }
+        
         try {
             const response = await fetch(`/api/goals/${goal.id}`, {
                 method: 'PATCH',
@@ -233,13 +277,18 @@ export function GoalDetail({ goal, user }: GoalDetailProps) {
                 body: JSON.stringify({ visibility: newVisibility }),
             });
 
-            if (!response.ok) throw new Error('Failed to update visibility');
-
-            router.refresh();
+            if (!response.ok) {
+                // Revert optimistic update if API fails
+                goal.visibility = oldVisibility;
+                throw new Error('Failed to update visibility');
+            }
         } catch (error) {
+            // Revert optimistic update if API fails
+            goal.visibility = oldVisibility;
+            toast.error('Failed to update visibility. Please try again.');
             console.error('Error updating visibility:', error);
         } finally {
-            setIsUpdating(false);
+            setIsUpdatingVisibility(false);
         }
     };
 
@@ -354,9 +403,9 @@ export function GoalDetail({ goal, user }: GoalDetailProps) {
                                         variant="default" 
                                         size="sm"
                                         onClick={() => handleVisibilityChange('public')}
-                                        disabled={isUpdating}
+                                        disabled={isUpdatingVisibility}
                                     >
-                                        {isUpdating ? (
+                                        {isUpdatingVisibility ? (
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                         ) : (
                                             <Globe className="mr-2 h-4 w-4" />
@@ -377,16 +426,24 @@ export function GoalDetail({ goal, user }: GoalDetailProps) {
                                                     <Share2 className="h-4 w-4 mr-2" />
                                                     View Public Page
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => handleVisibilityChange('private')}>
-                                                    <Lock className="h-4 w-4 mr-2" />
+                                                <DropdownMenuItem onClick={() => handleVisibilityChange('private')} disabled={isUpdatingVisibility}>
+                                                    {isUpdatingVisibility ? (
+                                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                    ) : (
+                                                        <Lock className="h-4 w-4 mr-2" />
+                                                    )}
                                                     Make Private
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                             </>
                                         )}
                                         {goal.visibility === 'private' && (
-                                            <DropdownMenuItem onClick={() => handleVisibilityChange('public')}>
-                                                <Globe className="h-4 w-4 mr-2" />
+                                            <DropdownMenuItem onClick={() => handleVisibilityChange('public')} disabled={isUpdatingVisibility}>
+                                                {isUpdatingVisibility ? (
+                                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                ) : (
+                                                    <Globe className="h-4 w-4 mr-2" />
+                                                )}
                                                 Make Public
                                             </DropdownMenuItem>
                                         )}
@@ -490,11 +547,6 @@ export function GoalDetail({ goal, user }: GoalDetailProps) {
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                {isUpdating && (
-                                    <div className="flex items-center justify-center py-4">
-                                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                                    </div>
-                                )}
                                 <div className="space-y-3">
                                     {localSteps.map((step, index) => (
                                         <div key={step.id}>
@@ -502,7 +554,7 @@ export function GoalDetail({ goal, user }: GoalDetailProps) {
                                                 step={step}
                                                 stepNumber={index + 1}
                                                 onToggle={() => handleStepToggle(step.id, step.status)}
-                                                disabled={isUpdating}
+                                                disabled={false}
                                                 goalTitle={goal.title}
                                                 goalContext={{
                                                     deadline: goal.deadline || undefined,
