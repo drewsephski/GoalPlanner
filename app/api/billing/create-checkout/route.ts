@@ -6,6 +6,24 @@ import { eq } from 'drizzle-orm';
 
 export async function POST(req: Request) {
   try {
+    // Validate environment variables first
+    const requiredEnvVars = [
+      'POLAR_ACCESS_TOKEN',
+      'POLAR_PRODUCT_ID_MONTHLY',
+    ];
+    
+    const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+    
+    if (missingVars.length > 0) {
+      console.error('Missing required environment variables:', missingVars);
+      return new Response(JSON.stringify({ 
+        error: `Server configuration error. Missing: ${missingVars.join(', ')}` 
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const session = await auth();
     const { userId } = session;
     const clerkUser = await currentUser();
@@ -55,6 +73,14 @@ export async function POST(req: Request) {
       server: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox',
     });
 
+    // Log configuration for debugging (remove sensitive data)
+    console.log('Polar checkout config:', {
+      server: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox',
+      hasAccessToken: !!process.env.POLAR_ACCESS_TOKEN,
+      productId: productId,
+      userId: userId,
+    });
+
     // Create Polar checkout session - ONLY these parameters
     const checkout = await polar.checkouts.create({
       customerName: dbUser.username || clerkUser.fullName || dbUser.email || 'Customer',
@@ -87,7 +113,29 @@ export async function POST(req: Request) {
       console.error('Error details:', {
         message: error.message,
         stack: error.stack,
+        name: error.name,
       });
+      
+      // Check for specific Polar API errors
+      if (error.message.includes('401') || error.message.includes('unauthorized')) {
+        return new Response(
+          JSON.stringify({ error: 'Polar API authentication failed - check POLAR_ACCESS_TOKEN' }), 
+          {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
+      }
+      
+      if (error.message.includes('404') || error.message.includes('not found')) {
+        return new Response(
+          JSON.stringify({ error: 'Polar product not found - check POLAR_PRODUCT_ID_MONTHLY' }), 
+          {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
+      }
       
       return new Response(
         JSON.stringify({ error: error.message }), 

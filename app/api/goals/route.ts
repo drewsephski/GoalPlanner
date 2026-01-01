@@ -1,4 +1,3 @@
-import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { goals, steps, users } from '@/lib/db/schema';
 import { generateGoalPlan } from '@/lib/ai/goal-planner';
@@ -6,16 +5,60 @@ import { extractStepsFromPlan } from '@/lib/ai/step-extractor';
 import { generateSlug } from '@/lib/utils/slug';
 import { canCreateGoal } from '@/lib/polar/subscription';
 import { eq } from 'drizzle-orm';
+import { cookies } from 'next/headers';
+
+// Helper function to create or get anonymous user
+async function getOrCreateAnonymousUser(): Promise<string> {
+  const cookieStore = await cookies();
+  const anonymousUserId = cookieStore.get('anonymous_user_id')?.value;
+
+  if (anonymousUserId) {
+    // Check if user exists
+    const existingUser = await db.query.users.findFirst({
+      where: eq(users.id, anonymousUserId),
+    });
+    
+    if (existingUser) {
+      return anonymousUserId;
+    }
+  }
+
+  // Create new anonymous user
+  const newUserId = `anon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const anonymousUsername = `user_${Date.now()}`;
+
+  await db.insert(users).values({
+    id: newUserId,
+    email: `${newUserId}@anonymous.local`,
+    username: anonymousUsername,
+    firstName: 'Anonymous',
+    lastName: 'User',
+  });
+
+  // Also create user stats
+  const { userStats } = await import('@/lib/db/schema');
+  await db.insert(userStats).values({ userId: newUserId });
+
+  return newUserId;
+}
 
 export async function POST(req: Request) {
   try {
-    const { userId } = await auth();
+    // Check for authenticated user first
+    let userId = null;
+    try {
+      const { auth } = await import('@clerk/nextjs/server');
+      const authData = await auth();
+      userId = authData.userId;
+    } catch {
+      // Clerk auth failed, continue with anonymous flow
+      console.log('Authentication not available, using anonymous flow');
+    }
 
+    // If no authenticated user, create or get anonymous user
     if (!userId) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const anonymousUserId = await getOrCreateAnonymousUser();
+      userId = anonymousUserId;
     }
 
     // Check subscription limits
@@ -48,16 +91,57 @@ export async function POST(req: Request) {
     }
 
     // Get user info for username
-    const user = await db.query.users.findFirst({
+    let user = await db.query.users.findFirst({
       where: eq(users.id, userId),
     });
 
-    if (!user || !user.username) {
-      return new Response(JSON.stringify({ error: 'User not found or username not set' }), {
+    if (!user) {
+      return new Response(JSON.stringify({ error: 'User not found' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
     }
+
+    // Generate username if not set
+    if (!user.username) {
+      const { currentUser } = await import('@clerk/nextjs/server');
+      const clerkUser = await currentUser();
+      
+      let generatedUsername = null;
+      
+      // Try to get username from Clerk first
+      if (clerkUser?.username) {
+        generatedUsername = clerkUser.username;
+      } else {
+        // Generate a username from email if no username exists
+        const email = clerkUser?.emailAddresses[0]?.emailAddress || user.email;
+        generatedUsername = email.split('@')[0] + '_' + userId.slice(-8);
+      }
+
+      // Update user with generated username
+      await db
+        .update(users)
+        .set({ 
+          username: generatedUsername,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, userId));
+
+      // Refetch user with updated username
+      user = await db.query.users.findFirst({
+        where: eq(users.id, userId),
+      });
+    }
+
+    if (!user?.username) {
+      return new Response(JSON.stringify({ error: 'Failed to generate username' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // User is now guaranteed to have a username
+    const userWithUsername = user!;
 
     // Generate AI plan with full context
     const aiPlan = await generateGoalPlan({
@@ -108,7 +192,7 @@ export async function POST(req: Request) {
       JSON.stringify({ 
         goalId: newGoal.id,
         slug: newGoal.slug,
-        username: user.username,
+        username: userWithUsername.username,
       }),
       {
         status: 201,
@@ -129,13 +213,21 @@ export async function POST(req: Request) {
 
 export async function GET() {
   try {
-    const { userId } = await auth();
+    // Check for authenticated user first
+    let userId = null;
+    try {
+      const { auth } = await import('@clerk/nextjs/server');
+      const authData = await auth();
+      userId = authData.userId;
+    } catch {
+      // Clerk auth failed, continue with anonymous flow
+      console.log('Authentication not available, using anonymous flow');
+    }
 
+    // If no authenticated user, create or get anonymous user
     if (!userId) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const anonymousUserId = await getOrCreateAnonymousUser();
+      userId = anonymousUserId;
     }
 
     const userGoals = await db.query.goals.findMany({

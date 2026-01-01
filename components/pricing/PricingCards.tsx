@@ -58,6 +58,7 @@ export function PricingCards({ currentSubscription }: PricingCardsProps) {
       const data = await response.json();
 
       if (!response.ok) {
+        console.error('Checkout API error:', data);
         throw new Error(data.error || 'Failed to create checkout');
       }
 
@@ -65,7 +66,8 @@ export function PricingCards({ currentSubscription }: PricingCardsProps) {
       window.location.href = data.checkoutUrl;
     } catch (error) {
       console.error('Error creating checkout:', error);
-      alert('Failed to start checkout. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to start checkout. Please try again.';
+      alert(errorMessage);
       setIsLoading(null);
     }
   };
