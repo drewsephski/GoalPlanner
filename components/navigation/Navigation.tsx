@@ -45,9 +45,12 @@ export function Navigation() {
                     variant={isActive ? "default" : "ghost"}
                     size="sm"
                     className="justify-start"
+                    asChild
                   >
-                    <item.icon className="h-4 w-4 mr-2" />
-                    {item.name}
+                    <span className="flex items-center">
+                      <item.icon className="h-4 w-4 mr-2" />
+                      {item.name}
+                    </span>
                   </Button>
                 </Link>
               );
@@ -65,8 +68,10 @@ export function Navigation() {
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-1">
             <Link href="/dashboard">
-              <Button variant="ghost" size="sm">
-                <LayoutDashboard className="h-5 w-5" />
+              <Button variant="ghost" size="sm" asChild>
+                <span className="flex items-center">
+                  <LayoutDashboard className="h-5 w-5" />
+                </span>
               </Button>
             </Link>
             <ThemeToggle />
