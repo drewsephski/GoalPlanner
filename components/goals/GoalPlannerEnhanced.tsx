@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,8 +20,10 @@ import {
   Calendar,
   Clock,
   AlertCircle,
-  Heart
+  Heart,
+  Crown
 } from 'lucide-react';
+import { UpgradePrompt } from '@/components/pro/UpgradePrompt';
 
 const EXAMPLE_GOALS = [
   "Learn to play guitar in 3 months",
@@ -110,7 +113,15 @@ export function GoalPlannerEnhanced() {
       // Redirect to private goal detail page
       router.push(`/goals/${goalId}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      
+      // Check if this is a subscription limit error
+      if (errorMessage.includes('maximum number of active goals') || errorMessage.includes('upgrade')) {
+        setError(errorMessage);
+      } else {
+        setError(errorMessage);
+      }
+      
       setIsSubmitting(false);
     }
   };
@@ -320,7 +331,17 @@ export function GoalPlannerEnhanced() {
             {error && (
               <div className="flex items-start gap-3 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
                 <AlertCircle className="w-5 h-5 text-destructive mt-0.5" />
-                <p className="text-sm text-destructive">{error}</p>
+                <div className="flex-1">
+                  <p className="text-sm text-destructive">{error}</p>
+                  {(error.includes('maximum number of active goals') || error.includes('upgrade')) && (
+                    <div className="mt-3">
+                      <UpgradePrompt
+                        feature="Unlimited Goals"
+                        description="You've reached the free tier limit. Upgrade to Pro to create unlimited goals and unlock advanced features."
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 

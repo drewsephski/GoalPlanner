@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { goals, userStats, users } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { DashboardContent } from '@/components/dashboard/DashboardContent';
+import { getUserSubscription } from '@/lib/polar/subscription';
 
 export const metadata = {
   title: 'Dashboard - Goal Planner Pro',
@@ -52,10 +53,14 @@ export default async function DashboardPage() {
       .returning();
   }
 
+  // Get user subscription
+  const subscription = await getUserSubscription(userId);
+
   return (
     <DashboardContent 
       goals={userGoals} 
       stats={stats}
+      subscription={subscription}
     />
   );
 }

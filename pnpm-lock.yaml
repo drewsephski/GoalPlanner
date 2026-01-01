@@ -35,6 +35,9 @@ importers:
       '@openrouter/ai-sdk-provider':
         specifier: ^1.5.4
         version: 1.5.4(ai@6.0.5(zod@4.3.2))(zod@4.3.2)
+      '@polar-sh/sdk':
+        specifier: ^0.42.1
+        version: 0.42.1
       '@tailwindcss/typography':
         specifier: ^0.5.19
         version: 0.5.19(tailwindcss@4.1.18)
@@ -113,6 +116,9 @@ importers:
       tw-animate-css:
         specifier: ^1.4.0
         version: 1.4.0
+      webhooks:
+        specifier: link:@polar-sh/sdk/webhooks
+        version: link:@polar-sh/sdk/webhooks
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4
@@ -1261,6 +1267,9 @@ packages:
   '@opentelemetry/api@1.9.0':
     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
     engines: {node: '>=8.0.0'}
+
+  '@polar-sh/sdk@0.42.1':
+    resolution: {integrity: sha512-4euyChnpZcjho2KhwnSXCBhJr5m8k+oaIicvwFHOZ/cXxKIKh7+EicJagSKg6jmuuq4YMOFhsxreHk3qqKXdWQ==}
 
   '@radix-ui/number@1.1.1':
     resolution: {integrity: sha512-MkKCwxlXTgz6CFoJx3pCwn07GKp36+aZyu/u2Ln2VrA5DcdyCZkASEDBTd8x5whTQQL5CiYf4prXKLcgQdv29g==}
@@ -6818,6 +6827,11 @@ snapshots:
       zod: 4.3.2
 
   '@opentelemetry/api@1.9.0': {}
+
+  '@polar-sh/sdk@0.42.1':
+    dependencies:
+      standardwebhooks: 1.0.0
+      zod: 4.3.2
 
   '@radix-ui/number@1.1.1': {}
 

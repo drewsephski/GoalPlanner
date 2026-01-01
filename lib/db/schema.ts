@@ -139,11 +139,44 @@ export const userStats = pgTable('user_stats', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+// Subscriptions table
+export const subscriptions = pgTable('subscriptions', {
+  id: text('id').primaryKey(), // Polar subscription ID
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  
+  status: text('status').notNull(), // active, canceled, past_due, trialing
+  tier: text('tier').notNull(), // free, pro
+  
+  // Polar data
+  polarCustomerId: text('polar_customer_id'),
+  polarSubscriptionId: text('polar_subscription_id'),
+  polarProductId: text('polar_product_id'),
+  
+  // Billing
+  currentPeriodStart: timestamp('current_period_start'),
+  currentPeriodEnd: timestamp('current_period_end'),
+  cancelAtPeriodEnd: boolean('cancel_at_period_end').notNull().default(false),
+  
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index('subscriptions_user_id_idx').on(table.userId),
+  statusIdx: index('subscriptions_status_idx').on(table.status),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   goals: many(goals),
   checkIns: many(checkIns),
   stats: one(userStats),
+  subscription: one(subscriptions),
+}));
+
+export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
+  user: one(users, {
+    fields: [subscriptions.userId],
+    references: [users.id],
+  }),
 }));
 
 export const goalsRelations = relations(goals, ({ one, many }) => ({

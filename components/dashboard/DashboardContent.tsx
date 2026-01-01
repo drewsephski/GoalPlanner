@@ -19,7 +19,8 @@ import {
   SortAsc,
   Calendar,
   TrendingUp,
-  AlertTriangle
+  AlertTriangle,
+  Crown
 } from 'lucide-react';
 import { 
   Select,
@@ -30,6 +31,8 @@ import {
 } from '@/components/ui/select';
 import { GoalCard } from '@/components/dashboard/GoalCard';
 import { EmptyState } from '@/components/dashboard/EmptyState';
+import { ProBadge } from '@/components/pro/ProBadge';
+import { UpgradePrompt } from '@/components/pro/UpgradePrompt';
 import { toast } from 'sonner';
 
 interface Goal {
@@ -57,12 +60,18 @@ interface Stats {
 interface DashboardContentProps {
   goals: Goal[];
   stats: Stats;
+  subscription?: {
+    tier?: string;
+    status?: string;
+  } | null;
 }
 
-export function DashboardContent({ goals, stats }: DashboardContentProps) {
+export function DashboardContent({ goals, stats, subscription }: DashboardContentProps) {
   const [filter, setFilter] = useState<'all' | 'active' | 'completed' | 'paused'>('active');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'created' | 'deadline' | 'progress' | 'lastActivity'>('created');
+
+  const isPro = subscription?.tier === 'pro' && subscription?.status === 'active';
 
   // Calculate goal progress and overdue status
   const goalsWithMetadata = useMemo(() => {
@@ -154,17 +163,27 @@ export function DashboardContent({ goals, stats }: DashboardContentProps) {
       <div className="container mx-auto py-6 px-4 max-w-7xl">
         {/* Header */}
         <div className="flex flex-col gap-4 mb-6">
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-bold mb-2">Your Goals</h1>
-            <p className="text-muted-foreground text-sm sm:text-base">
-              Track your progress and achieve your ambitions
-            </p>
+          <div className="flex items-center gap-2">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold mb-2">Your Goals</h1>
+              <p className="text-muted-foreground text-sm sm:text-base">
+                Track your progress and achieve your ambitions
+              </p>
+            </div>
+            {isPro && <ProBadge className="ml-2" />}
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <Link href="/settings" className="flex-1 sm:flex-none">
               <Button variant="ghost" size="sm" className="w-full sm:w-auto justify-center">
                 <Settings className="mr-2 h-4 w-4" />
                 Settings
+              </Button>
+            </Link>
+            <Link href="/analytics" className="flex-1 sm:flex-none">
+              <Button variant="ghost" size="sm" className="w-full sm:w-auto justify-center">
+                <TrendingUp className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Analytics</span>
+                <span className="sm:hidden">Stats</span>
               </Button>
             </Link>
             <Link href="/planner" className="flex-1 sm:flex-none">
@@ -174,6 +193,15 @@ export function DashboardContent({ goals, stats }: DashboardContentProps) {
                 <span className="sm:hidden">New Goal</span>
               </Button>
             </Link>
+            {!isPro && (
+              <Link href="/pricing" className="flex-1 sm:flex-none">
+                <Button variant="outline" size="sm" className="w-full sm:w-auto justify-center border-primary text-primary hover:bg-primary/10">
+                  <Crown className="mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Upgrade to Pro</span>
+                  <span className="sm:hidden">Pro</span>
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
 
@@ -244,6 +272,16 @@ export function DashboardContent({ goals, stats }: DashboardContentProps) {
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Upgrade Prompt for Free Users with 3+ Goals */}
+        {!isPro && activeGoals.length >= 3 && (
+          <div className="mb-6">
+            <UpgradePrompt
+              feature="Unlimited Goals"
+              description="You've reached the limit of 3 active goals. Upgrade to Pro to create unlimited goals and unlock advanced features."
+            />
+          </div>
         )}
 
         {/* Stats Grid */}

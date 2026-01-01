@@ -4,6 +4,7 @@ import { goals, steps, users } from '@/lib/db/schema';
 import { generateGoalPlan } from '@/lib/ai/goal-planner';
 import { extractStepsFromPlan } from '@/lib/ai/step-extractor';
 import { generateSlug } from '@/lib/utils/slug';
+import { canCreateGoal } from '@/lib/polar/subscription';
 import { eq } from 'drizzle-orm';
 
 export async function POST(req: Request) {
@@ -15,6 +16,24 @@ export async function POST(req: Request) {
         status: 401,
         headers: { 'Content-Type': 'application/json' },
       });
+    }
+
+    // Check subscription limits
+    const canCreate = await canCreateGoal(userId);
+
+    if (!canCreate.allowed) {
+      return new Response(
+        JSON.stringify({ 
+          error: canCreate.reason,
+          upgrade: true,
+          currentCount: canCreate.currentCount,
+          limit: canCreate.limit,
+        }),
+        {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     const body = await req.json();

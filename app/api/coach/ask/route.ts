@@ -4,6 +4,7 @@ import { goals, checkIns } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { streamText } from 'ai';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
+import { isProUser } from '@/lib/polar/subscription';
 
 const openrouter = createOpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
@@ -94,7 +95,21 @@ export async function POST(req: Request) {
       originalPlan: goal.aiPlan,
     };
 
+    // Check if user is Pro for enhanced features
+    const isPro = await isProUser(userId);
+
     const systemPrompt = `You are an empathetic and experienced goal achievement coach. You're helping someone work towards their goal.
+
+${isPro ? `
+**PREMIUM USER**: This user has Pro access. Provide:
+- More detailed, personalized advice (3-4 paragraphs instead of 2-3)
+- Deeper psychological insights about their motivation
+- Advanced strategies and frameworks (like SMART goals, habit stacking, etc.)
+- Specific book/resource recommendations when relevant
+- Follow-up questions to help them think deeper
+` : ` 
+**FREE USER**: Keep responses helpful but concise (2-3 paragraphs max).
+`}
 
 CONTEXT:
 Goal: ${context.goal.title}
@@ -104,7 +119,7 @@ Biggest concern: ${context.goal.biggestConcern}
 
 PROGRESS:
 - ${context.progress.completedSteps} of ${context.progress.totalSteps} steps completed (${context.progress.percentComplete}%)
-- ${context.progress.daysSinceStart} days into the journey
+- ${context.progress.daysSinceStart} days into journey
 ${context.progress.currentStep ? `- Currently working on: ${context.progress.currentStep.title}` : ''}
 
 RECENT CHECK-INS:
@@ -116,8 +131,8 @@ YOUR ROLE:
 3. Address concerns directly
 4. If they're stuck, help them break things down into smaller steps
 5. If they're doing well, celebrate and encourage
-6. If they need to adjust the timeline or approach, suggest it honestly
-7. Keep responses concise but warm (2-3 paragraphs max)
+6. If they need to adjust timeline or approach, suggest it honestly
+7. ${isPro ? 'Provide comprehensive, detailed responses with advanced insights' : 'Keep responses concise but warm (2-3 paragraphs max)'}
 
 Respond in a conversational, supportive tone. You're a coach, not a robot.`;
 
@@ -128,7 +143,7 @@ Respond in a conversational, supportive tone. You're a coach, not a robot.`;
       system: systemPrompt,
       prompt: userPrompt,
       temperature: 0.7,
-      maxOutputTokens: 500,
+      maxOutputTokens: isPro ? 800 : 500,
     });
 
     return result.toTextStreamResponse({
