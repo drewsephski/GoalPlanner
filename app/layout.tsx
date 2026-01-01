@@ -26,6 +26,16 @@ export const metadata: Metadata = {
   creator: "GoalPlanner Team",
   publisher: "GoalPlanner Pro",
   metadataBase: new URL("https://goalplanner.pro"),
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   openGraph: {
     title: "GoalPlanner Pro - AI-Powered Goal Planning",
     description: "Transform your big ambitions into actionable steps with AI-powered goal planning, smart coaching, and progress tracking.",
