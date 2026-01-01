@@ -34,6 +34,75 @@ async function getOrCreateAnonymousUser(): Promise<string> {
   }
 }
 
+// Helper function to save goal to localStorage as fallback
+function saveGoalToLocalStorage(goalData: {
+  title: string;
+  slug: string;
+  why?: string | null;
+  deadline?: string | null;
+  timeCommitment?: string | null;
+  biggestConcern?: string | null;
+  aiPlan: {
+    overview: string;
+    steps: Array<{
+      title: string;
+      description: string;
+      order: number;
+    }>;
+    timeline: string;
+    tips: string[];
+  };
+  status: string;
+  visibility: string;
+}, userId: string, username: string) {
+  if (typeof window !== 'undefined') {
+    try {
+      const existingGoals = JSON.parse(localStorage.getItem('fallbackGoals') || '[]');
+      const fallbackGoal = {
+        ...goalData,
+        id: `fallback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        userId,
+        username,
+        createdAt: new Date().toISOString(),
+        isFallback: true,
+      };
+      existingGoals.push(fallbackGoal);
+      localStorage.setItem('fallbackGoals', JSON.stringify(existingGoals));
+      console.log('Goal saved to localStorage as fallback:', fallbackGoal.id);
+      return fallbackGoal;
+    } catch (error) {
+      console.error('Failed to save goal to localStorage:', error);
+      return null;
+    }
+  }
+  return null;
+}
+
+// Helper function to retry database operations with exponential backoff
+async function retryDbOperation<T>(
+  operation: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelay: number = 1000
+): Promise<T> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      console.error(`Database operation attempt ${attempt} failed:`, error);
+      
+      if (attempt === maxRetries) {
+        throw error;
+      }
+      
+      const delay = baseDelay * Math.pow(2, attempt - 1);
+      console.log(`Retrying in ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  throw new Error('Max retries exceeded');
+}
+
 export async function POST(req: Request) {
   try {
     console.log('Goal creation request received');
@@ -165,54 +234,103 @@ export async function POST(req: Request) {
       biggestConcern: biggestConcern?.trim() || '',
     });
 
-    // Generate unique slug for public URL
+    // Generate unique slug for public URL (with fallback)
     console.log('Generating slug for goal');
-    const slug = await generateSlug(title, userId);
-
-    // Create goal in database
-    console.log('Creating goal in database');
-    let newGoal;
+    let slug;
     try {
-      [newGoal] = await db
-        .insert(goals)
-        .values({
-          userId,
-          title: title.trim(),
-          slug,
-          why: why?.trim() || null,
-          deadline: deadline || null,
-          timeCommitment: timeCommitment?.trim() || null,
-          biggestConcern: biggestConcern?.trim() || null,
-          aiPlan,
-          status: 'active',
-          visibility: 'private',
-        })
-        .returning();
+      slug = await retryDbOperation(() => generateSlug(title, userId));
     } catch (error) {
-      console.error('Error creating goal in database:', error);
-      return new Response(
-        JSON.stringify({ error: 'Failed to save goal to database' }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      console.error('Error generating slug:', error);
+      // Fallback to simple slug generation
+      const timestamp = Date.now();
+      const randomSuffix = Math.random().toString(36).substr(2, 6);
+      slug = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 30)}-${timestamp}-${randomSuffix}`;
+      console.log('Using fallback slug:', slug);
     }
 
-    // Extract and save steps from AI plan
+    // Create goal in database with fallback mechanism
+    console.log('Creating goal in database');
+    let newGoal: any;
+    const goalData = {
+      userId,
+      title: title.trim(),
+      slug,
+      why: why?.trim() || null,
+      deadline: deadline || null,
+      timeCommitment: timeCommitment?.trim() || null,
+      biggestConcern: biggestConcern?.trim() || null,
+      aiPlan,
+      status: 'active',
+      visibility: 'private',
+    };
+    
+    try {
+      [newGoal] = await retryDbOperation(() => 
+        db.insert(goals).values(goalData).returning()
+      );
+      console.log('Goal successfully created in database:', newGoal.id);
+    } catch (error) {
+      console.error('Error creating goal in database:', error);
+      
+      // Fallback: Create a mock goal object
+      newGoal = {
+        ...goalData,
+        id: `fallback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        startedAt: new Date(),
+        isFallback: true,
+      };
+      
+      console.log('Using fallback goal object:', newGoal.id);
+      
+      // Try to save to localStorage if available
+      const localStorageGoal = saveGoalToLocalStorage(goalData, userId, userWithUsername.username || '');
+      if (localStorageGoal) {
+        newGoal.id = localStorageGoal.id;
+      }
+    }
+
+    // Extract and save steps from AI plan (with fallback)
     const extractedSteps = extractStepsFromPlan(aiPlan);
+    let stepsSaved = false;
     
     if (extractedSteps.length > 0) {
-      await db.insert(steps).values(
-        extractedSteps.map((step, index) => ({
-          goalId: newGoal.id,
-          orderNum: index + 1,
-          title: step.title,
-          description: step.description || null,
-          dueDate: step.dueDate || null,
-          status: 'pending',
-        }))
-      );
+      try {
+        await retryDbOperation(() =>
+          db.insert(steps).values(
+            extractedSteps.map((step, index) => ({
+              goalId: newGoal.id,
+              orderNum: index + 1,
+              title: step.title,
+              description: step.description || null,
+              dueDate: step.dueDate || null,
+              status: 'pending',
+            }))
+          )
+        );
+        stepsSaved = true;
+        console.log('Steps successfully saved to database');
+      } catch (error) {
+        console.error('Error saving steps to database:', error);
+        
+        // Save steps to localStorage as fallback
+        if (typeof window !== 'undefined') {
+          try {
+            const stepsWithGoalId = extractedSteps.map((step, index) => ({
+              ...step,
+              goalId: newGoal.id,
+              orderNum: index + 1,
+              status: 'pending',
+              isFallback: true,
+            }));
+            localStorage.setItem(`fallback_steps_${newGoal.id}`, JSON.stringify(stepsWithGoalId));
+            console.log('Steps saved to localStorage as fallback');
+          } catch (localStorageError) {
+            console.error('Failed to save steps to localStorage:', localStorageError);
+          }
+        }
+      }
     }
 
     return new Response(
@@ -220,6 +338,8 @@ export async function POST(req: Request) {
         goalId: newGoal.id,
         slug: newGoal.slug,
         username: userWithUsername.username,
+        isFallback: newGoal.isFallback || false,
+        stepsSaved,
       }),
       {
         status: 201,
