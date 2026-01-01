@@ -12,8 +12,26 @@ import {
     Flame,
     Target,
     BarChart3,
-    AlertCircle
+    AlertCircle,
+    PieChart,
+    Activity
 } from 'lucide-react';
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    PieChart as RePieChart,
+    Pie,
+    Cell,
+    LineChart,
+    Line,
+    Area,
+    AreaChart
+} from 'recharts';
 
 interface Goal {
     id: string;
@@ -46,6 +64,54 @@ export function GoalAnalytics({ goal }: GoalAnalyticsProps) {
     const skippedSteps = goal.steps.filter(s => s.status === 'skipped').length;
     
     const progressPercent = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0;
+    
+    // Chart data for step status distribution
+    const stepStatusData = [
+        { name: 'Completed', value: completedSteps, color: '#22c55e' },
+        { name: 'In Progress', value: inProgressSteps, color: '#3b82f6' },
+        { name: 'Pending', value: pendingSteps, color: '#6b7280' },
+        { name: 'Skipped', value: skippedSteps, color: '#f59e0b' },
+    ].filter(item => item.value > 0);
+
+    // Chart data for completion timeline
+    const completionTimeline = useMemo(() => {
+        const sortedSteps = [...goal.steps]
+            .filter(s => s.status === 'completed' && s.completedAt)
+            .sort((a, b) => new Date(a.completedAt!).getTime() - new Date(b.completedAt!).getTime());
+        
+        return sortedSteps.map((step, index) => ({
+            step: `Step ${index + 1}`,
+            completedDate: new Date(step.completedAt!).toLocaleDateString(),
+            daysSinceStart: Math.floor((new Date(step.completedAt!).getTime() - new Date(goal.startedAt).getTime()) / (1000 * 60 * 60 * 24)),
+            cumulativeCompleted: index + 1
+        }));
+    }, [goal.steps, goal.startedAt]);
+
+    // Chart data for progress over time
+    const progressOverTime = useMemo(() => {
+        const daysSinceStart = Math.floor((currentTime.getTime() - new Date(goal.startedAt).getTime()) / (1000 * 60 * 60 * 24));
+        const data = [];
+        
+        for (let i = 0; i <= daysSinceStart; i++) {
+            const targetDate = new Date(goal.startedAt);
+            targetDate.setDate(targetDate.getDate() + i);
+            
+            const stepsCompletedByDate = goal.steps.filter(step => 
+                step.status === 'completed' && 
+                step.completedAt && 
+                new Date(step.completedAt) <= targetDate
+            ).length;
+            
+            data.push({
+                day: i + 1,
+                date: targetDate.toLocaleDateString(),
+                completed: stepsCompletedByDate,
+                total: totalSteps
+            });
+        }
+        
+        return data;
+    }, [goal.steps, goal.startedAt, currentTime, totalSteps]);
     
     // Calculate average time per step (in days)
     const completedStepsWithDates = goal.steps.filter(s => 
@@ -257,7 +323,138 @@ export function GoalAnalytics({ goal }: GoalAnalyticsProps) {
                 </Card>
             )}
 
-            {/* Insights */}
+            {/* Progress Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Step Status Distribution */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <PieChart className="h-5 w-5 text-primary" />
+                            Step Status Distribution
+                        </CardTitle>
+                        <CardDescription>
+                            Visual breakdown of your step completion
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {stepStatusData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <RePieChart>
+                                    <Pie
+                                        data={stepStatusData}
+                                        cx="50%"
+                                        cy="50%"
+                                        labelLine={false}
+                                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                        outerRadius={80}
+                                        fill="#888"
+                                        dataKey="value"
+                                    >
+                                            {stepStatusData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={entry.color} />
+                                            ))}
+                                        </Pie>
+                                    <Tooltip />
+                                </RePieChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                                No steps completed yet
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Progress Over Time */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Activity className="h-5 w-5 text-primary" />
+                            Progress Over Time
+                        </CardTitle>
+                        <CardDescription>
+                            Track your completion progress day by day
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {progressOverTime.length > 1 ? (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <AreaChart data={progressOverTime}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis 
+                                        dataKey="day" 
+                                        tick={{ fontSize: 12 }}
+                                        tickFormatter={(value) => `Day ${value}`}
+                                    />
+                                    <YAxis 
+                                        tick={{ fontSize: 12 }}
+                                        domain={[0, totalSteps]}
+                                    />
+                                    <Tooltip 
+                                        labelFormatter={(value) => `Day ${value}`}
+                                        formatter={(value, name) => [
+                                            name === 'completed' ? `${value} steps` : value,
+                                            name === 'completed' ? 'Completed' : 'Total'
+                                        ]}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="completed"
+                                        stroke="#3b82f6"
+                                        fill="#3b82f6"
+                                        fillOpacity={0.3}
+                                        strokeWidth={2}
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                                Not enough data for timeline
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Completion Timeline */}
+            {completionTimeline.length > 0 && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <BarChart3 className="h-5 w-5 text-primary" />
+                            Completion Timeline
+                        </CardTitle>
+                        <CardDescription>
+                            When you completed each step
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <ResponsiveContainer width="100%" height={250}>
+                            <BarChart data={completionTimeline}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis 
+                                    dataKey="step" 
+                                    tick={{ fontSize: 12 }}
+                                    angle={-45}
+                                    textAnchor="end"
+                                    height={60}
+                                />
+                                <YAxis 
+                                    tick={{ fontSize: 12 }}
+                                    label={{ value: 'Days Since Start', angle: -90, position: 'insideLeft' }}
+                                />
+                                <Tooltip 
+                                    formatter={(value, name) => [
+                                        name === 'daysSinceStart' ? `${value} days` : value,
+                                        name === 'daysSinceStart' ? 'Days Since Start' : 'Cumulative Completed'
+                                    ]}
+                                />
+                                <Bar dataKey="daysSinceStart" fill="#3b82f6" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+            )}
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">

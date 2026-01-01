@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { 
   Plus, 
   Target, 
@@ -13,8 +14,20 @@ import {
   CheckCircle2,
   Pause,
   Archive,
-  Settings
+  Settings,
+  Search,
+  SortAsc,
+  Calendar,
+  TrendingUp,
+  AlertTriangle
 } from 'lucide-react';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { GoalCard } from '@/components/dashboard/GoalCard';
 import { EmptyState } from '@/components/dashboard/EmptyState';
 import { toast } from 'sonner';
@@ -26,6 +39,7 @@ interface Goal {
   status: string;
   visibility: string;
   createdAt: Date;
+  updatedAt: Date;
   deadline: string | null;
   steps: Array<{
     id: string;
@@ -47,6 +61,71 @@ interface DashboardContentProps {
 
 export function DashboardContent({ goals, stats }: DashboardContentProps) {
   const [filter, setFilter] = useState<'all' | 'active' | 'completed' | 'paused'>('active');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'created' | 'deadline' | 'progress' | 'lastActivity'>('created');
+
+  // Calculate goal progress and overdue status
+  const goalsWithMetadata = useMemo(() => {
+    return goals.map(goal => {
+      const totalSteps = goal.steps.length;
+      const completedSteps = goal.steps.filter(s => s.status === 'completed').length;
+      const progressPercent = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0;
+      
+      const isOverdue = goal.deadline && new Date(goal.deadline) < new Date() && goal.status === 'active';
+      const daysUntilDeadline = goal.deadline 
+        ? Math.ceil((new Date(goal.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+        : null;
+
+      return {
+        ...goal,
+        progressPercent,
+        isOverdue,
+        daysUntilDeadline,
+        lastActivity: new Date(goal.updatedAt) // Using updatedAt as proxy for last activity
+      };
+    });
+  }, [goals]);
+
+  // Filter and sort goals
+  const filteredAndSortedGoals = useMemo(() => {
+    let filtered = goalsWithMetadata.filter(goal => {
+      if (filter === 'all') return true;
+      return goal.status === filter;
+    });
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(goal => 
+        goal.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply sorting
+    return filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'deadline':
+          // Goals without deadline go to the end
+          if (!a.deadline && !b.deadline) return 0;
+          if (!a.deadline) return 1;
+          if (!b.deadline) return -1;
+          return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+        
+        case 'progress':
+          return b.progressPercent - a.progressPercent;
+        
+        case 'lastActivity':
+          return b.lastActivity.getTime() - a.lastActivity.getTime();
+        
+        case 'created':
+        default:
+          return b.createdAt.getTime() - a.createdAt.getTime();
+      }
+    });
+  }, [goalsWithMetadata, filter, searchQuery, sortBy]);
+
+  const activeGoals = goals.filter(g => g.status === 'active');
+  const completedGoals = goals.filter(g => g.status === 'completed');
+  const overdueGoals = goalsWithMetadata.filter(g => g.isOverdue);
 
   const handleDeleteGoal = async (goalId: string, goalTitle: string) => {
     if (!confirm(`Are you sure you want to delete "${goalTitle}"? This cannot be undone.`)) {
@@ -69,14 +148,6 @@ export function DashboardContent({ goals, stats }: DashboardContentProps) {
       toast.error('Failed to delete goal. Please try again.');
     }
   };
-
-  const filteredGoals = goals.filter(goal => {
-    if (filter === 'all') return true;
-    return goal.status === filter;
-  });
-
-  const activeGoals = goals.filter(g => g.status === 'active');
-  const completedGoals = goals.filter(g => g.status === 'completed');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-muted/50 via-background to-card/50">
@@ -105,6 +176,75 @@ export function DashboardContent({ goals, stats }: DashboardContentProps) {
             </Link>
           </div>
         </div>
+
+        {/* Search and Sort Controls */}
+        {goals.length > 0 && (
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            {/* Search */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search goals..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            {/* Sort */}
+            <Select value={sortBy} onValueChange={(value: 'created' | 'deadline' | 'progress' | 'lastActivity') => setSortBy(value)}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SortAsc className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="created">
+                  <div className="flex items-center">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Created Date
+                  </div>
+                </SelectItem>
+                <SelectItem value="deadline">
+                  <div className="flex items-center">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Deadline
+                  </div>
+                </SelectItem>
+                <SelectItem value="progress">
+                  <div className="flex items-center">
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    Progress
+                  </div>
+                </SelectItem>
+                <SelectItem value="lastActivity">
+                  <div className="flex items-center">
+                    <Clock className="mr-2 h-4 w-4" />
+                    Last Activity
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {/* Overdue Alert */}
+        {overdueGoals.length > 0 && (
+          <Card className="mb-6 border-destructive/50 bg-destructive/5">
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                <div>
+                  <p className="font-medium text-destructive">
+                    {overdueGoals.length} overdue goal{overdueGoals.length > 1 ? 's' : ''}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Some goals have passed their deadline. Consider updating them.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
@@ -214,9 +354,9 @@ export function DashboardContent({ goals, stats }: DashboardContentProps) {
         )}
 
         {/* Goals Grid */}
-        {filteredGoals.length > 0 ? (
+        {filteredAndSortedGoals.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-            {filteredGoals.map((goal) => (
+            {filteredAndSortedGoals.map((goal) => (
               <GoalCard key={goal.id} goal={goal} onDelete={handleDeleteGoal} />
             ))}
           </div>

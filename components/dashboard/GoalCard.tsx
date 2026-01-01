@@ -20,7 +20,9 @@ import {
   Globe,
   Lock,
   Loader2,
-  Trash2
+  Trash2,
+  Check,
+  Play
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -50,6 +52,76 @@ export function GoalCard({ goal, onDelete }: GoalCardProps) {
   const progressPercent = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0;
   
   const nextStep = localGoal.steps.find(s => s.status === 'pending' || s.status === 'in_progress');
+
+  const handleQuickCheckIn = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    setIsUpdating(true);
+    
+    try {
+      const response = await fetch('/api/check-ins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          goalId: localGoal.id,
+          type: 'daily',
+          mood: 'good',
+          content: null,
+          isPublic: false,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to check in');
+      }
+      
+      toast.success('Quick check-in completed! ✅');
+    } catch (error) {
+      toast.error('Failed to check in. Please try again.');
+      console.error('Error checking in:', error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleQuickStepComplete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!nextStep) return;
+    
+    setIsUpdating(true);
+    
+    try {
+      const response = await fetch(`/api/steps/${nextStep.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'completed' }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to complete step');
+      }
+      
+      // Optimistically update the UI
+      setLocalGoal(prev => ({
+        ...prev,
+        steps: prev.steps.map(step => 
+          step.id === nextStep.id 
+            ? { ...step, status: 'completed' }
+            : step
+        )
+      }));
+      
+      toast.success('Step completed! Great job! 🎉');
+    } catch (error) {
+      toast.error('Failed to complete step. Please try again.');
+      console.error('Error completing step:', error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   const handleVisibilityToggle = async (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent card click navigation
@@ -226,6 +298,62 @@ export function GoalCard({ goal, onDelete }: GoalCardProps) {
             <div className="pt-3 sm:pt-4 border-t flex items-center gap-2 text-chart-2">
               <CheckCircle2 className="h-5 w-5" />
               <span className="text-sm font-medium">Goal Completed! 🎉</span>
+            </div>
+          )}
+
+          {/* Quick Actions */}
+          {localGoal.status === 'active' && (
+            <div className="pt-3 sm:pt-4 border-t">
+              <p className="text-xs text-muted-foreground mb-2">Quick actions:</p>
+              <div className="flex gap-2">
+                {/* Quick Check-in */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleQuickCheckIn}
+                      disabled={isUpdating}
+                      className="flex-1 h-8 text-xs min-h-[44px] touch-action-manipulation"
+                    >
+                      {isUpdating ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Check className="h-3 w-3 mr-1" />
+                      )}
+                      <span className="hidden sm:inline">Check In</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Quick daily check-in</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                {/* Quick Step Complete */}
+                {nextStep && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleQuickStepComplete}
+                        disabled={isUpdating}
+                        className="flex-1 h-8 text-xs min-h-[44px] touch-action-manipulation"
+                      >
+                        {isUpdating ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Play className="h-3 w-3 mr-1" />
+                        )}
+                        <span className="hidden sm:inline">Complete Step</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Complete next step</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
             </div>
           )}
 

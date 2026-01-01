@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Target, Sparkles, CheckCircle2, Users, ArrowRight, TrendingUp, Calendar, Share2, Brain, BarChart3 } from 'lucide-react';
 import AnimatedBackground from '@/components/ui/animated-background';
 import { LandingNavigation } from '@/components/navigation/LandingNavigation';
+import { Footer } from '@/components/ui/footer';
 
 export default async function HomePage() {
     const { userId } = await auth();
@@ -16,12 +17,15 @@ export default async function HomePage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background relative overflow-hidden">
+        <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background relative overflow-hidden flex flex-col">
             <LandingNavigation />
-            {/* Enhanced Background decoration */}
-            <div className="absolute inset-0 bg-grid-white/[0.02] [mask-image:radial-gradient(ellipse_at_center,white_10%,transparent_75%)]" />
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-chart-2/5 rounded-full blur-3xl" />
+            
+            {/* Main Content */}
+            <main className="flex-1">
+                {/* Enhanced Background decoration */}
+                <div className="absolute inset-0 bg-grid-white/[0.02] [mask-image:radial-gradient(ellipse_at_center,white_10%,transparent_75%)]" />
+                <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-chart-2/5 rounded-full blur-3xl" />
             
             {/* Hero Section */}
             <div className="container mx-auto px-4 py-16 sm:py-20 md:py-32 relative z-10">
@@ -45,16 +49,16 @@ export default async function HomePage() {
                         </p>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center pt-2 sm:pt-4 px-4">
-                        <Link href="/sign-up" className="w-full sm:w-auto">
-                            <Button size="lg" className="text-base sm:text-lg md:text-xl px-6 sm:px-8 md:px-10 py-4 sm:py-6 md:py-7 bg-gradient-to-r from-primary to-chart-2 hover:opacity-90 transition-all duration-300 shadow-lg shadow-primary/20 group w-full sm:w-auto min-h-[44px] touch-action-manipulation">
-                                <span className="text-sm sm:text-base">Get Started Free</span>
-                                <ArrowRight className="ml-2 h-4 w-4 sm:h-6 sm:w-6 md:h-8 md:w-8 group-hover:translate-x-1 transition-transform duration-200" />
+                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center pt-4 sm:pt-6 px-4">
+                        <Link href="/sign-up" className="w-full sm:w-auto max-w-sm">
+                            <Button size="lg" className="text-lg sm:text-xl md:text-2xl px-8 sm:px-12 md:px-16 py-6 sm:py-8 md:py-10 bg-gradient-to-r from-primary to-chart-2 hover:opacity-90 transition-all duration-300 shadow-lg shadow-primary/20 group w-full sm:w-auto min-h-[52px] sm:min-h-[56px] touch-action-manipulation font-semibold">
+                                <span className="text-base sm:text-lg">Get Started Free</span>
+                                <ArrowRight className="ml-2 h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 group-hover:translate-x-1 transition-transform duration-200" />
                             </Button>
                         </Link>
-                        <Link href="/sign-in" className="w-full sm:w-auto">
-                            <Button size="lg" variant="outline" className="text-base sm:text-lg md:text-xl px-6 sm:px-8 md:px-10 py-4 sm:py-6 md:py-7 border-2 hover:bg-accent transition-all duration-300 w-full sm:w-auto min-h-[44px] touch-action-manipulation">
-                                <span className="text-sm sm:text-base">Sign In</span>
+                        <Link href="/sign-in" className="w-full sm:w-auto max-w-sm">
+                            <Button size="lg" variant="outline" className="text-lg sm:text-xl md:text-2xl px-8 sm:px-12 md:px-16 py-6 sm:py-8 md:py-10 border-2 hover:bg-accent transition-all duration-300 w-full sm:w-auto min-h-[52px] sm:min-h-[56px] touch-action-manipulation font-semibold">
+                                <span className="text-base sm:text-lg">Sign In</span>
                             </Button>
                         </Link>
                     </div>
@@ -74,6 +78,7 @@ export default async function HomePage() {
                         </div>
                     </div>
                 </div>
+            </div>
 
                 {/* Enhanced Features Grid */}
                 <div className="mt-16 sm:mt-20 md:mt-32 lg:mt-40 max-w-7xl mx-auto">
@@ -221,11 +226,11 @@ export default async function HomePage() {
                                 <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed px-4">
                                     Join thousands of users who are already turning their dreams into reality with our AI-powered platform.
                                 </p>
-                                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-2 sm:pt-4 px-4">
-                                    <Link href="/sign-up" className="w-full sm:w-auto">
-                                        <Button size="lg" className="text-base sm:text-lg md:text-xl px-6 sm:px-8 md:px-10 py-4 sm:py-6 md:py-7 bg-gradient-to-r from-primary to-chart-2 hover:opacity-90 transition-all duration-300 shadow-lg shadow-primary/20 group w-full sm:w-auto min-h-[44px] touch-action-manipulation">
-                                            <span className="text-sm sm:text-base">Start Your Journey</span>
-                                            <ArrowRight className="ml-2 h-4 w-4 sm:h-6 sm:w-6 group-hover:translate-x-1 transition-transform duration-200"/>
+                                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center pt-4 sm:pt-6 px-4">
+                                    <Link href="/sign-up" className="w-full sm:w-auto max-w-sm">
+                                        <Button size="lg" className="text-lg sm:text-xl md:text-2xl px-8 sm:px-12 md:px-16 py-6 sm:py-8 md:py-10 bg-gradient-to-r from-primary to-chart-2 hover:opacity-90 transition-all duration-300 shadow-lg shadow-primary/20 group w-full sm:w-auto min-h-[52px] sm:min-h-[56px] touch-action-manipulation font-semibold">
+                                            <span className="text-base sm:text-lg">Start Your Journey</span>
+                                            <ArrowRight className="ml-2 h-5 w-5 sm:h-6 sm:w-6 group-hover:translate-x-1 transition-transform duration-200"/>
                                         </Button>
                                     </Link>
                                 </div>
@@ -240,7 +245,10 @@ export default async function HomePage() {
                     </a>
                 </div>
             </div>
+            </main>
+            
+            {/* Footer */}
+            <Footer />
         </div>
-    </div>
     );
 }

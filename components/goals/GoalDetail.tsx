@@ -34,6 +34,21 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { StepItem } from './StepItem';
 import { CoachingSection } from './CoachingSection';
 import { CheckInHistory } from './CheckInHistory';
@@ -104,6 +119,14 @@ export function GoalDetail({ goal, user }: GoalDetailProps) {
     const [activeTab, setActiveTab] = useState('steps');
     const [localSteps, setLocalSteps] = useState(goal.steps);
     const [localGoalStatus, setLocalGoalStatus] = useState(goal.status);
+
+    // DnD Kit sensors
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
 
     const totalSteps = localSteps.length;
     const completedSteps = localSteps.filter(s => s.status === 'completed').length;
@@ -334,6 +357,96 @@ export function GoalDetail({ goal, user }: GoalDetailProps) {
         console.log('Toggled sub-step:', subStepId, 'to:', !subStepsCompletion[subStepId]);
     };
 
+    const handleStepUpdate = async (stepId: string, data: { title?: string; description?: string; dueDate?: string }) => {
+        try {
+            const response = await fetch(`/api/steps/${stepId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update step');
+            }
+
+            // Update local state
+            setLocalSteps(prev => prev.map(step => 
+                step.id === stepId 
+                    ? { ...step, ...data }
+                    : step
+            ));
+        } catch (error) {
+            console.error('Error updating step:', error);
+            throw error;
+        }
+    };
+
+    const handleStepDelete = async (stepId: string) => {
+        try {
+            const response = await fetch(`/api/steps/${stepId}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete step');
+            }
+
+            // Update local state
+            setLocalSteps(prev => prev.filter(step => step.id !== stepId));
+            toast.success('Step deleted successfully');
+        } catch (error) {
+            console.error('Error deleting step:', error);
+            toast.error('Failed to delete step');
+        }
+    };
+
+    const handleDragEndEvent = async (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (active.id !== over?.id) {
+            const oldIndex = localSteps.findIndex(step => step.id === active.id);
+            const newIndex = localSteps.findIndex(step => step.id === over?.id);
+
+            if (oldIndex !== -1 && newIndex !== -1) {
+                const newSteps = arrayMove(localSteps, oldIndex, newIndex);
+                
+                // Update orderNum values
+                const stepsWithOrderNum = newSteps.map((step, index) => ({
+                    ...step,
+                    orderNum: index
+                }));
+
+                // Update local state immediately
+                setLocalSteps(stepsWithOrderNum);
+
+                // Send to API
+                try {
+                    const reorderData = stepsWithOrderNum.map((step, index) => ({
+                        stepId: step.id,
+                        orderNum: index
+                    }));
+
+                    const response = await fetch('/api/steps/reorder', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ reorderData }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to reorder steps');
+                    }
+
+                    toast.success('Steps reordered successfully');
+                } catch (error) {
+                    console.error('Error reordering steps:', error);
+                    toast.error('Failed to reorder steps');
+                    // Revert on error
+                    setLocalSteps(localSteps);
+                }
+            }
+        }
+    };
+
     const daysUntilDeadline = goal.deadline 
         ? Math.ceil((new Date(goal.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
         : null;
@@ -543,41 +656,53 @@ export function GoalDetail({ goal, user }: GoalDetailProps) {
                             <CardHeader>
                                 <CardTitle>Action Steps</CardTitle>
                                 <CardDescription>
-                                    Check off steps as you complete them
+                                    Check off steps as you complete them. Drag to reorder.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <div className="space-y-3">
-                                    {localSteps.map((step, index) => (
-                                        <div key={step.id}>
-                                            <StepItem
-                                                step={step}
-                                                stepNumber={index + 1}
-                                                onToggle={() => handleStepToggle(step.id, step.status)}
-                                                disabled={false}
-                                                goalTitle={goal.title}
-                                                goalContext={{
-                                                    deadline: goal.deadline || undefined,
-                                                    timeCommitment: goal.timeCommitment || undefined,
-                                                    biggestConcern: goal.biggestConcern || undefined,
-                                                }}
-                                                onSubStepsCreated={handleSubStepsCreated}
-                                                onStatusChange={handleStepStatusChange}
-                                                onSubStepToggle={handleSubStepToggle}
-                                                subSteps={Array.isArray(expandedSteps[step.id]) ? (expandedSteps[step.id] as Array<{ title: string; description: string; estimatedTime: string }>).map((subStep, idx: number) => {
-                                                    const subStepId = `${step.id}-sub-${idx}`;
-                                                    return {
-                                                        id: subStepId,
-                                                        title: subStep.title,
-                                                        description: subStep.description,
-                                                        completed: subStepsCompletion[subStepId] || false,
-                                                        orderNum: idx
-                                                    };
-                                                }) : []}
-                                            />
+                                <DndContext
+                                    sensors={sensors}
+                                    collisionDetection={closestCenter}
+                                    onDragEnd={handleDragEndEvent}
+                                >
+                                    <SortableContext
+                                        items={localSteps.map(step => step.id)}
+                                        strategy={verticalListSortingStrategy}
+                                    >
+                                        <div className="space-y-3">
+                                            {localSteps.map((step, index) => (
+                                                <StepItem
+                                                    key={step.id}
+                                                    step={step}
+                                                    stepNumber={index + 1}
+                                                    onToggle={() => handleStepToggle(step.id, step.status)}
+                                                    disabled={false}
+                                                    goalTitle={goal.title}
+                                                    goalContext={{
+                                                        deadline: goal.deadline || undefined,
+                                                        timeCommitment: goal.timeCommitment || undefined,
+                                                        biggestConcern: goal.biggestConcern || undefined,
+                                                    }}
+                                                    onSubStepsCreated={handleSubStepsCreated}
+                                                    onStatusChange={handleStepStatusChange}
+                                                    onSubStepToggle={handleSubStepToggle}
+                                                    onUpdate={handleStepUpdate}
+                                                    onDelete={handleStepDelete}
+                                                    subSteps={Array.isArray(expandedSteps[step.id]) ? (expandedSteps[step.id] as Array<{ title: string; description: string; estimatedTime: string }>).map((subStep, idx: number) => {
+                                                        const subStepId = `${step.id}-sub-${idx}`;
+                                                        return {
+                                                            id: subStepId,
+                                                            title: subStep.title,
+                                                            description: subStep.description,
+                                                            completed: subStepsCompletion[subStepId] || false,
+                                                            orderNum: idx
+                                                        };
+                                                    }) : []}
+                                                />
+                                            ))}
                                         </div>
-                                    ))}
-                                </div>
+                                    </SortableContext>
+                                </DndContext>
                             </CardContent>
                         </Card>
                         <CoachingSection goalId={goal.id} />
