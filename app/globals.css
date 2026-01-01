@@ -123,4 +123,36 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    html {
+      -webkit-text-size-adjust: 100%;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body {
+      overscroll-behavior: contain;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    /* Better touch targets on mobile */
+    button, a, input, textarea, select {
+      min-height: 44px;
+      touch-action: manipulation;
+    }
+    
+    /* Prevent horizontal scroll on mobile */
+    * {
+      max-width: 100%;
+    }
+  }
+  
+  /* Touch-friendly interactions */
+  @media (hover: none) and (pointer: coarse) {
+    button, a, [role="button"] {
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    }
+  }
 }

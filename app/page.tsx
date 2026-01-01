@@ -24,14 +24,14 @@ export default async function HomePage() {
             <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-chart-2/5 rounded-full blur-3xl" />
             
             {/* Hero Section */}
-            <div className="container mx-auto px-4 py-20 md:py-32 relative z-10">
-                <div className="max-w-6xl mx-auto text-center space-y-12">
-                    <div className="inline-flex items-center justify-center p-5 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-2xl backdrop-blur-sm border border-primary/10 mb-6">
-                        <Target className="w-14 h-14 text-primary" />
+            <div className="container mx-auto px-4 py-16 sm:py-20 md:py-32 relative z-10">
+                <div className="max-w-6xl mx-auto text-center space-y-8 sm:space-y-12">
+                    <div className="inline-flex items-center justify-center p-4 sm:p-5 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-2xl backdrop-blur-sm border border-primary/10 mb-4 sm:mb-6">
+                        <Target className="w-10 h-10 sm:w-14 sm:h-14 text-primary" />
                     </div>
 
-                    <div className="space-y-8">
-                        <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold leading-[1.1] tracking-tight">
+                    <div className="space-y-4 sm:space-y-8">
+                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-[1.1] sm:leading-[1.1] tracking-tight">
                             <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
                                 Turn Goals into
                             </span>
@@ -40,53 +40,53 @@ export default async function HomePage() {
                             </span>
                         </h1>
                         
-                        <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-light">
+                        <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-light px-4">
                             AI-powered goal planning with social accountability. Create your plan, track progress, and celebrate wins with a supportive community.
                         </p>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-                        <Link href="/sign-up">
-                            <Button size="lg" className="text-base md:text-lg px-10 py-7 bg-gradient-to-r from-primary to-chart-2 hover:opacity-90 transition-all duration-300 shadow-lg shadow-primary/20 group">
-                                Get Started Free
-                                <ArrowRight className="ml-2 h-8 w-8 group-hover:translate-x-1 transition-transform duration-200" />
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center pt-2 sm:pt-4 px-4">
+                        <Link href="/sign-up" className="w-full sm:w-auto">
+                            <Button size="lg" className="text-base sm:text-lg md:text-xl px-6 sm:px-8 md:px-10 py-4 sm:py-6 md:py-7 bg-gradient-to-r from-primary to-chart-2 hover:opacity-90 transition-all duration-300 shadow-lg shadow-primary/20 group w-full sm:w-auto min-h-[44px] touch-action-manipulation">
+                                <span className="text-sm sm:text-base">Get Started Free</span>
+                                <ArrowRight className="ml-2 h-4 w-4 sm:h-6 sm:w-6 md:h-8 md:w-8 group-hover:translate-x-1 transition-transform duration-200" />
                             </Button>
                         </Link>
-                        <Link href="/sign-in">
-                            <Button size="lg" variant="outline" className="text-base md:text-lg px-10 py-7 border-2 hover:bg-accent transition-all duration-300">
-                                Sign In
+                        <Link href="/sign-in" className="w-full sm:w-auto">
+                            <Button size="lg" variant="outline" className="text-base sm:text-lg md:text-xl px-6 sm:px-8 md:px-10 py-4 sm:py-6 md:py-7 border-2 hover:bg-accent transition-all duration-300 w-full sm:w-auto min-h-[44px] touch-action-manipulation">
+                                <span className="text-sm sm:text-base">Sign In</span>
                             </Button>
                         </Link>
                     </div>
                     
-                    <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8 text-sm text-muted-foreground pt-2">
+                    <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 md:gap-8 text-xs sm:text-sm text-muted-foreground pt-2 px-4">
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                            <span>No credit card required</span>
+                            <span className="text-xs sm:text-sm">No credit card required</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                            <span>Free forever plan</span>
+                            <span className="text-xs sm:text-sm">Free forever plan</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                            <span>Cancel anytime</span>
+                            <span className="text-xs sm:text-sm">Cancel anytime</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Enhanced Features Grid */}
-                <div className="mt-24 md:mt-40 max-w-7xl mx-auto">
-                    <div className="text-center mb-20 space-y-4">
-                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">Everything You Need to Succeed</h2>
-                        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-light">
+                <div className="mt-16 sm:mt-20 md:mt-32 lg:mt-40 max-w-7xl mx-auto">
+                    <div className="text-center mb-12 sm:mb-16 md:mb-20 space-y-3 sm:space-y-4 px-4">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">Everything You Need to Succeed</h2>
+                        <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-light">
                             Powerful features designed to keep you motivated and on track
                         </p>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 px-4">
                         <AnimatedBackground
-                            className='rounded-3xl bg-gradient-to-br from-card to-card/50 border border-border shadow-xl backdrop-blur-sm'
+                            className='rounded-2xl sm:rounded-3xl bg-gradient-to-br from-card to-card/50 border border-border shadow-xl backdrop-blur-sm'
                             transition={{
                                 type: 'spring',
                                 bounce: 0.2,
@@ -133,15 +133,15 @@ export default async function HomePage() {
                                 },
                             ].map((item, index) => (
                                 <div key={index} data-id={`card-${index}`} className="h-full">
-                                    <div className='flex flex-col items-center justify-center text-center space-y-5 p-8 h-full min-h-[240px]'>
-                                        <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary/15 to-chart-2/15 rounded-2xl flex-shrink-0 border border-primary/10">
-                                            <item.icon className="w-8 h-8 text-primary" />
+                                    <div className='flex flex-col items-center justify-center text-center space-y-4 sm:space-y-5 p-6 sm:p-8 h-full min-h-[200px] sm:min-h-[240px]'>
+                                        <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-primary/15 to-chart-2/15 rounded-xl sm:rounded-2xl flex-shrink-0 border border-primary/10">
+                                            <item.icon className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
                                         </div>
-                                        <div className="space-y-3 flex-1 flex flex-col justify-center">
-                                            <h3 className='text-xl font-semibold text-foreground'>
+                                        <div className="space-y-2 sm:space-y-3 flex-1 flex flex-col justify-center">
+                                            <h3 className='text-lg sm:text-xl font-semibold text-foreground'>
                                                 {item.title}
                                             </h3>
-                                            <p className='text-sm text-muted-foreground leading-relaxed'>
+                                            <p className='text-xs sm:text-sm text-muted-foreground leading-relaxed'>
                                                 {item.description}
                                             </p>
                                         </div>
@@ -153,55 +153,55 @@ export default async function HomePage() {
                 </div>
 
                 {/* Enhanced How It Works */}
-                <div className="mt-24 md:mt-40 max-w-6xl mx-auto">
-                    <div className="text-center mb-20 space-y-4">
-                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">How It Works</h2>
-                        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-light">
+                <div className="mt-16 sm:mt-20 md:mt-32 lg:mt-40 max-w-6xl mx-auto">
+                    <div className="text-center mb-12 sm:mb-16 md:mb-20 space-y-3 sm:space-y-4 px-4">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">How It Works</h2>
+                        <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-light">
                             Start achieving your goals in three simple steps
                         </p>
                     </div>
                     
-                    <div className="grid md:grid-cols-3 gap-12">
-                        <div className="text-center space-y-6 group">
-                            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary/15 to-chart-2/15 rounded-3xl border border-primary/10 transition-all duration-300">
-                                <Sparkles className="w-10 h-10 text-primary" />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 px-4">
+                        <div className="text-center space-y-4 sm:space-y-6 group">
+                            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary/15 to-chart-2/15 rounded-2xl sm:rounded-3xl border border-primary/10 transition-all duration-300">
+                                <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
                             </div>
-                            <div className="space-y-3">
+                            <div className="space-y-2 sm:space-y-3">
                                 <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-2">
                                     1
                                 </div>
-                                <h3 className="text-2xl font-semibold">Create Your Plan</h3>
-                                <p className="text-muted-foreground text-base leading-relaxed">
+                                <h3 className="text-xl sm:text-2xl font-semibold">Create Your Plan</h3>
+                                <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
                                     AI generates a personalized action plan tailored to your specific goals and timeline
                                 </p>
                             </div>
                         </div>
 
-                        <div className="text-center space-y-6 group">
-                            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary/15 to-chart-2/15 rounded-3xl border border-primary/10 transition-all duration-300">
-                                <CheckCircle2 className="w-10 h-10 text-primary" />
+                        <div className="text-center space-y-4 sm:space-y-6 group">
+                            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary/15 to-chart-2/15 rounded-2xl sm:rounded-3xl border border-primary/10 transition-all duration-300">
+                                <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
                             </div>
-                            <div className="space-y-3">
+                            <div className="space-y-2 sm:space-y-3">
                                 <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-2">
                                     2
                                 </div>
-                                <h3 className="text-2xl font-semibold">Track Progress</h3>
-                                <p className="text-muted-foreground text-base leading-relaxed">
+                                <h3 className="text-xl sm:text-2xl font-semibold">Track Progress</h3>
+                                <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
                                     Daily check-ins and adaptive coaching keep you motivated and on track every step
                                 </p>
                             </div>
                         </div>
 
-                        <div className="text-center space-y-6 group">
-                            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary/15 to-chart-2/15 rounded-3xl border border-primary/10 transition-all duration-300">
-                                <Users className="w-10 h-10 text-primary" />
+                        <div className="text-center space-y-4 sm:space-y-6 group">
+                            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-primary/15 to-chart-2/15 rounded-2xl sm:rounded-3xl border border-primary/10 transition-all duration-300">
+                                <Users className="w-8 h-8 sm:w-10 sm:h-10 text-primary" />
                             </div>
-                            <div className="space-y-3">
+                            <div className="space-y-2 sm:space-y-3">
                                 <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-2">
                                     3
                                 </div>
-                                <h3 className="text-2xl font-semibold">Share & Celebrate</h3>
-                                <p className="text-muted-foreground text-base leading-relaxed">
+                                <h3 className="text-xl sm:text-2xl font-semibold">Share & Celebrate</h3>
+                                <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
                                     Share your wins and inspire others with beautiful, shareable progress updates
                                 </p>
                             </div>
@@ -210,22 +210,22 @@ export default async function HomePage() {
                 </div>
                 
                 {/* Enhanced CTA Section */}
-                <div className="mt-24 md:mt-40 max-w-5xl mx-auto">
-                    <div className="relative rounded-3xl overflow-hidden">
+                <div className="mt-16 sm:mt-20 md:mt-32 lg:mt-40 max-w-5xl mx-auto">
+                    <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-chart-2/10 to-primary/5" />
-                        <div className="relative backdrop-blur-sm bg-card/80 border border-border p-12 md:p-20">
-                            <div className="text-center space-y-8">
-                                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+                        <div className="relative backdrop-blur-sm bg-card/80 border border-border p-8 sm:p-12 md:p-16 lg:p-20">
+                            <div className="text-center space-y-6 sm:space-y-8">
+                                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
                                     Ready to Achieve Your Goals?
                                 </h2>
-                                <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed">
+                                <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed px-4">
                                     Join thousands of users who are already turning their dreams into reality with our AI-powered platform.
                                 </p>
-                                <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-                                    <Link href="/sign-up">
-                                        <Button size="lg" className="text-base md:text-lg px-10 py-7 bg-gradient-to-r from-primary to-chart-2 hover:opacity-90 transition-all duration-300 shadow-lg shadow-primary/20 group">
-                                            Start Your Journey
-                                            <ArrowRight className="ml-2 h-6 w-6 group-hover:translate-x-1 transition-transform duration-200"/>
+                                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-2 sm:pt-4 px-4">
+                                    <Link href="/sign-up" className="w-full sm:w-auto">
+                                        <Button size="lg" className="text-base sm:text-lg md:text-xl px-6 sm:px-8 md:px-10 py-4 sm:py-6 md:py-7 bg-gradient-to-r from-primary to-chart-2 hover:opacity-90 transition-all duration-300 shadow-lg shadow-primary/20 group w-full sm:w-auto min-h-[44px] touch-action-manipulation">
+                                            <span className="text-sm sm:text-base">Start Your Journey</span>
+                                            <ArrowRight className="ml-2 h-4 w-4 sm:h-6 sm:w-6 group-hover:translate-x-1 transition-transform duration-200"/>
                                         </Button>
                                     </Link>
                                 </div>
@@ -234,9 +234,9 @@ export default async function HomePage() {
                     </div>
 
                 {/* Product Hunt Badge */}
-                <div className="mt-16 flex justify-center">
+                <div className="mt-12 sm:mt-16 flex justify-center px-4">
                     <a href="https://www.producthunt.com/products/goalplanner?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-goalplanner" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
-                        <img alt="GoalPlanner - Turn New Year's resolutions into reality with action plans. | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1056776&theme=light&t=1767239558716" />
+                        <img alt="GoalPlanner - Turn New Year's resolutions into reality with action plans. | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1056776&theme=light&t=1767239558716" className="max-w-full h-auto" />
                     </a>
                 </div>
             </div>

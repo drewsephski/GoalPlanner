@@ -126,11 +126,11 @@ export function GoalCard({ goal, onDelete }: GoalCardProps) {
   return (
     <TooltipProvider>
       <Link href={`/goals/${goal.id}`}>
-        <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer group">
-          <CardHeader>
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className={getStatusColor(localGoal.status)}>
+        <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer group touch-action-manipulation">
+          <CardHeader className="pb-3 sm:pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className={`${getStatusColor(localGoal.status)} text-xs`}>
                   {getStatusText(localGoal.status)}
                 </Badge>
                 {/* Visibility Toggle */}
@@ -141,7 +141,7 @@ export function GoalCard({ goal, onDelete }: GoalCardProps) {
                       size="sm"
                       onClick={handleVisibilityToggle}
                       disabled={isUpdating}
-                      className="h-6 px-2 text-xs"
+                      className="h-7 px-2 text-xs min-h-[44px] touch-action-manipulation"
                     >
                       {isUpdating ? (
                         <Loader2 className="h-3 w-3 animate-spin" />
@@ -168,7 +168,7 @@ export function GoalCard({ goal, onDelete }: GoalCardProps) {
                       variant="ghost"
                       size="sm"
                       onClick={handleDelete}
-                      className="h-6 px-2 text-xs text-destructive hover:text-destructive"
+                      className="h-7 px-2 text-xs text-destructive hover:text-destructive min-h-[44px] touch-action-manipulation"
                     >
                       <Trash2 className="h-3 w-3" />
                     </Button>
@@ -188,12 +188,12 @@ export function GoalCard({ goal, onDelete }: GoalCardProps) {
               </div>
             )}
           </div>
-          <CardTitle className="text-xl line-clamp-2 group-hover:text-primary transition-colors">
+          <CardTitle className="text-lg sm:text-xl line-clamp-2 group-hover:text-primary transition-colors">
             {localGoal.title}
           </CardTitle>
         </CardHeader>
         
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4">
           {/* Progress */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
@@ -210,7 +210,7 @@ export function GoalCard({ goal, onDelete }: GoalCardProps) {
 
           {/* Next Step */}
           {nextStep && localGoal.status === 'active' && (
-            <div className="pt-4 border-t">
+            <div className="pt-3 sm:pt-4 border-t">
               <p className="text-xs text-muted-foreground mb-2">Next step:</p>
               <div className="flex items-start gap-2">
                 <Circle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
@@ -223,7 +223,7 @@ export function GoalCard({ goal, onDelete }: GoalCardProps) {
 
           {/* Completed Badge */}
           {localGoal.status === 'completed' && (
-            <div className="pt-4 border-t flex items-center gap-2 text-chart-2">
+            <div className="pt-3 sm:pt-4 border-t flex items-center gap-2 text-chart-2">
               <CheckCircle2 className="h-5 w-5" />
               <span className="text-sm font-medium">Goal Completed! 🎉</span>
             </div>
