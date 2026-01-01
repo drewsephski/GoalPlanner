@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { db } from '@/lib/db';
-import { goals } from '@/lib/db/schema';
+import { goals, users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { CheckInForm } from '@/components/check-ins/CheckInForm';
 
@@ -13,11 +13,21 @@ export const metadata = {
 export default async function CheckInPage({
   searchParams,
 }: {
-  searchParams: { goalId?: string; mood?: string };
+  searchParams: Promise<{ goalId?: string; mood?: string }>;
 }) {
   const { userId } = await auth();
+  const resolvedSearchParams = await searchParams;
 
   if (!userId) {
+    redirect('/sign-in');
+  }
+
+  // Fetch user info
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+
+  if (!user || !user.username) {
     redirect('/sign-in');
   }
 
@@ -27,8 +37,8 @@ export default async function CheckInPage({
     orderBy: (goals, { desc }) => [desc(goals.createdAt)],
   });
 
-  const selectedGoalId = searchParams.goalId || activeGoals[0]?.id;
-  const initialMood = searchParams.mood;
+  const selectedGoalId = resolvedSearchParams.goalId || activeGoals[0]?.id;
+  const initialMood = resolvedSearchParams.mood;
 
   return (
     <CheckInForm

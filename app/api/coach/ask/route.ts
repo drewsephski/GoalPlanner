@@ -124,7 +124,7 @@ Respond in a conversational, supportive tone. You're a coach, not a robot.`;
     const userPrompt = question || 'I need help with my goal. What should I do next?';
 
     const result = streamText({
-      model: openrouter('x-ai/grok-beta'),
+      model: openrouter('google/gemini-2.5-flash-lite-preview-09-2025'),
       system: systemPrompt,
       prompt: userPrompt,
       temperature: 0.7,

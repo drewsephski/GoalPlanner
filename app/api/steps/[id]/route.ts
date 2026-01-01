@@ -21,7 +21,7 @@ export async function PATCH(
 
     const { status } = await req.json();
 
-    if (!['pending', 'in_progress', 'completed', 'skipped'].includes(status)) {
+    if (!['pending', 'in_progress', 'paused', 'completed', 'skipped'].includes(status)) {
       return new Response(JSON.stringify({ error: 'Invalid status' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
@@ -44,12 +44,17 @@ export async function PATCH(
     }
 
     // Update step
+    const updateData: { status: string; completedAt?: Date | null } = { status };
+    
+    if (status === 'completed') {
+      updateData.completedAt = new Date();
+    } else if (step.status === 'completed' && status !== 'completed') {
+      updateData.completedAt = null;
+    }
+
     const [updatedStep] = await db
       .update(steps)
-      .set({
-        status,
-        completedAt: status === 'completed' ? new Date() : null,
-      })
+      .set(updateData)
       .where(eq(steps.id, id))
       .returning();
 

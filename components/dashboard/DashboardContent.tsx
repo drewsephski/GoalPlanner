@@ -12,16 +12,19 @@ import {
   Clock,
   CheckCircle2,
   Pause,
-  Archive
+  Archive,
+  Settings
 } from 'lucide-react';
 import { GoalCard } from '@/components/dashboard/GoalCard';
 import { EmptyState } from '@/components/dashboard/EmptyState';
+import { toast } from 'sonner';
 
 interface Goal {
   id: string;
   title: string;
   slug: string;
   status: string;
+  visibility: string;
   createdAt: Date;
   deadline: string | null;
   steps: Array<{
@@ -45,6 +48,28 @@ interface DashboardContentProps {
 export function DashboardContent({ goals, stats }: DashboardContentProps) {
   const [filter, setFilter] = useState<'all' | 'active' | 'completed' | 'paused'>('active');
 
+  const handleDeleteGoal = async (goalId: string, goalTitle: string) => {
+    if (!confirm(`Are you sure you want to delete "${goalTitle}"? This cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/goals/${goalId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete goal');
+      }
+
+      // Refresh the page to show updated goals
+      window.location.reload();
+    } catch (error) {
+      console.error('Error deleting goal:', error);
+      toast.error('Failed to delete goal. Please try again.');
+    }
+  };
+
   const filteredGoals = goals.filter(goal => {
     if (filter === 'all') return true;
     return goal.status === filter;
@@ -64,12 +89,20 @@ export function DashboardContent({ goals, stats }: DashboardContentProps) {
               Track your progress and achieve your ambitions
             </p>
           </div>
-          <Link href="/planner">
-            <Button size="lg" className="bg-gradient-to-r from-primary to-chart-2">
-              <Plus className="mr-2 h-5 w-5" />
-              Create New Goal
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/settings">
+              <Button variant="ghost" size="sm">
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </Button>
+            </Link>
+            <Link href="/planner">
+              <Button size="lg" className="bg-gradient-to-r from-primary to-chart-2">
+                <Plus className="mr-2 h-5 w-5" />
+                Create New Goal
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Stats Grid */}
@@ -172,7 +205,7 @@ export function DashboardContent({ goals, stats }: DashboardContentProps) {
         {filteredGoals.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredGoals.map((goal) => (
-              <GoalCard key={goal.id} goal={goal} />
+              <GoalCard key={goal.id} goal={goal} onDelete={handleDeleteGoal} />
             ))}
           </div>
         ) : goals.length > 0 ? (

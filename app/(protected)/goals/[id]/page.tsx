@@ -5,9 +5,10 @@ import { goals } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { GoalDetail } from '@/components/goals/GoalDetail';
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const goal = await db.query.goals.findFirst({
-    where: eq(goals.id, params.id),
+    where: eq(goals.id, id),
   });
 
   if (!goal) {
@@ -22,8 +23,9 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   };
 }
 
-export default async function GoalPage({ params }: { params: { id: string } }) {
+export default async function GoalPage({ params }: { params: Promise<{ id: string }> }) {
   const { userId } = await auth();
+  const { id } = await params;
 
   if (!userId) {
     redirect('/sign-in');
@@ -32,13 +34,14 @@ export default async function GoalPage({ params }: { params: { id: string } }) {
   // Fetch goal with steps
   const goal = await db.query.goals.findFirst({
     where: and(
-      eq(goals.id, params.id),
+      eq(goals.id, id),
       eq(goals.userId, userId)
     ),
     with: {
       steps: {
         orderBy: (steps, { asc }) => [asc(steps.orderNum)],
       },
+      user: true, // Add this
     },
   });
 
@@ -46,5 +49,5 @@ export default async function GoalPage({ params }: { params: { id: string } }) {
     notFound();
   }
 
-  return <GoalDetail goal={goal} />;
+  return <GoalDetail goal={goal} user={goal.user} />;
 }

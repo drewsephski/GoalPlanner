@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { Navigation } from '@/components/navigation/Navigation';
 
 export default async function ProtectedLayout({
   children,
@@ -47,5 +48,10 @@ export default async function ProtectedLayout({
     }
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <Navigation />
+      {children}
+    </>
+  );
 }

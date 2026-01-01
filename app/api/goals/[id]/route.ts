@@ -87,7 +87,7 @@ export async function PATCH(
     }
 
     // Update goal
-    const updateData: any = { updatedAt: new Date() };
+    const updateData: { updatedAt: Date; status?: string; completedAt?: Date | null; visibility?: string } = { updatedAt: new Date() };
     
     if (status) {
       if (!['active', 'paused', 'completed', 'abandoned'].includes(status)) {

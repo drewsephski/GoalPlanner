@@ -26,6 +26,7 @@ import {
 interface Goal {
   id: string;
   title: string;
+  slug: string;
   status: string;
 }
 
@@ -80,9 +81,13 @@ export function CheckInForm({ goals, selectedGoalId, initialMood }: CheckInFormP
       }
 
       setShowSuccess(true);
-      setTimeout(() => {
-        router.push(`/goals/${goalId}`);
-      }, 1500);
+      // Find the goal to get its ID
+      const selectedGoal = goals.find(g => g.id === goalId);
+      if (selectedGoal) {
+        setTimeout(() => {
+          router.push(`/goals/${goalId}`);
+        }, 1500);
+      }
     } catch (error) {
       console.error('Error submitting check-in:', error);
       setIsSubmitting(false);

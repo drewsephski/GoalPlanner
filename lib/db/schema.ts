@@ -43,7 +43,7 @@ export const goals = pgTable('goals', {
   
   // Status
   status: text('status').notNull().default('active'), // active, paused, completed, abandoned
-  visibility: text('visibility').notNull().default('private'), // private, public, unlisted
+  visibility: text('visibility').notNull().default('public'), // private, public, unlisted
   
   // Timestamps
   startedAt: timestamp('started_at').defaultNow().notNull(),

@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
-import { goals, userStats } from '@/lib/db/schema';
+import { goals, userStats, users } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { DashboardContent } from '@/components/dashboard/DashboardContent';
 
@@ -15,6 +15,18 @@ export default async function DashboardPage() {
   if (!userId) {
     return null; // Protected by layout
   }
+
+  // Fetch user info
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+
+  if (!user) {
+    return null; // Should not happen if user is properly set up
+  }
+
+  // Use email as fallback username if username is not set
+  // const username = user.username || user.email.split('@')[0] || 'user';
 
   // Fetch user's goals with steps
   const userGoals = await db.query.goals.findMany({

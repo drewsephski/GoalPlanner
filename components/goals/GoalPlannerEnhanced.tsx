@@ -107,7 +107,7 @@ export function GoalPlannerEnhanced() {
 
       const { goalId } = await response.json();
       
-      // Redirect to goal detail page
+      // Redirect to private goal detail page
       router.push(`/goals/${goalId}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');

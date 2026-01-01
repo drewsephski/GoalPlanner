@@ -82,7 +82,7 @@ export async function POST(req: Request): Promise<Response> {
 
     // Stream the response with proper error handling
     const result = streamText({
-      model: openrouter('x-ai/grok-4.1-fast'),
+      model: openrouter('google/gemini-2.5-flash-lite-preview-09-2025'),
       system: SYSTEM_PROMPT,
       prompt: `User's goal: "${goal}"`,
       // Best practice: handle errors during streaming

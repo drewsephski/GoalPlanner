@@ -1,9 +1,10 @@
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
-import { goals, steps } from '@/lib/db/schema';
+import { goals, steps, users } from '@/lib/db/schema';
 import { generateGoalPlan } from '@/lib/ai/goal-planner';
 import { extractStepsFromPlan } from '@/lib/ai/step-extractor';
 import { generateSlug } from '@/lib/utils/slug';
+import { eq } from 'drizzle-orm';
 
 export async function POST(req: Request) {
   try {
@@ -22,6 +23,18 @@ export async function POST(req: Request) {
     // Validate required fields
     if (!title?.trim()) {
       return new Response(JSON.stringify({ error: 'Title is required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Get user info for username
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+    });
+
+    if (!user || !user.username) {
+      return new Response(JSON.stringify({ error: 'User not found or username not set' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -76,6 +89,7 @@ export async function POST(req: Request) {
       JSON.stringify({ 
         goalId: newGoal.id,
         slug: newGoal.slug,
+        username: user.username,
       }),
       {
         status: 201,
