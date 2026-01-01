@@ -1,6 +1,22 @@
 {
-  "name": "planner",
-  "version": "0.1.0",
+  "name": "goalplanner-pro",
+  "version": "1.0.0",
+  "description": "AI-powered goal planning that transforms your big ambitions into actionable steps with smart coaching and progress tracking.",
+  "keywords": ["goal-planning", "ai", "productivity", "progress-tracking", "coaching", "nextjs", "supabase"],
+  "homepage": "https://goalplanner.pro",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/goalplanner-pro.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/goalplanner-pro/issues"
+  },
+  "author": {
+    "name": "GoalPlanner Team",
+    "email": "team@goalplanner.pro",
+    "url": "https://goalplanner.pro"
+  },
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "next dev",
