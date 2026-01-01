@@ -83,6 +83,11 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
+        <head>
+          <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+          <link rel="icon" href="/icon.png" type="image/png" />
+          <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        </head>
         <body
           className={`${dmSans.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
           suppressHydrationWarning
