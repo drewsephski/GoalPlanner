@@ -1,0 +1,303 @@
+/* Mobile Optimization Manifest for GoalPlanner Pro */
+
+/* ===== MOBILE-FIRST DESIGN PRINCIPLES ===== */
+
+/* 1. RESPONSIVE TYPOGRAPHY */
+.text-responsive {
+  @apply text-sm sm:text-base md:text-lg lg:text-xl;
+}
+
+.text-responsive-sm {
+  @apply text-xs sm:text-sm md:text-base;
+}
+
+.text-responsive-lg {
+  @apply text-lg sm:text-xl md:text-2xl lg:text-3xl;
+}
+
+/* 2. TOUCH-FRIENDLY INTERACTIONS */
+.touch-target {
+  @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+}
+
+.touch-target-sm {
+  @apply min-h-[36px] min-w-[36px] flex items-center justify-center;
+}
+
+/* 3. MOBILE NAVIGATION */
+.mobile-nav {
+  @apply sticky top-0 z-50 bg-background/95 backdrop-blur border-b;
+}
+
+.mobile-nav-item {
+  @apply flex items-center justify-center h-10 w-10 p-0;
+}
+
+/* 4. MOBILE CARDS */
+.mobile-card {
+  @apply mx-2 sm:mx-0 rounded-lg sm:rounded-xl;
+}
+
+.mobile-card-content {
+  @apply p-3 sm:p-4 md:p-6;
+}
+
+/* 5. MOBILE BUTTONS */
+.mobile-btn-primary {
+  @apply w-full sm:w-auto h-12 text-sm sm:text-base;
+}
+
+.mobile-btn-secondary {
+  @apply w-full sm:w-auto h-10 text-sm sm:text-base;
+}
+
+/* 6. MOBILE FORMS */
+.mobile-form {
+  @apply space-y-3 sm:space-y-4;
+}
+
+.mobile-input {
+  @apply h-12 text-base sm:h-10 sm:text-sm;
+}
+
+.mobile-textarea {
+  @apply h-24 text-base sm:h-32 sm:text-sm;
+}
+
+/* 7. MOBILE LAYOUTS */
+.mobile-grid {
+  @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4;
+}
+
+.mobile-grid-2 {
+  @apply grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4;
+}
+
+/* 8. MOBILE SPACING */
+.mobile-spacing {
+  @apply px-4 sm:px-6 md:px-8;
+}
+
+.mobile-spacing-y {
+  @apply py-4 sm:py-6 md:py-8;
+}
+
+/* 9. MOBILE VISIBILITY */
+.mobile-only {
+  @apply block sm:hidden;
+}
+
+.desktop-only {
+  @apply hidden sm:block;
+}
+
+/* 10. MOBILE ANIMATIONS */
+.mobile-safe-animation {
+  @apply transition-transform duration-200 ease-out;
+}
+
+/* 11. MOBILE ACCESSIBILITY */
+.mobile-focus {
+  @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+}
+
+/* 12. MOBILE SCROLLING */
+.mobile-scroll {
+  @apply overflow-x-auto scrollbar-hide;
+}
+
+/* 13. MOBILE OVERLAYS */
+.mobile-overlay {
+  @apply fixed inset-0 z-50 bg-black/50 backdrop-blur-sm;
+}
+
+/* 14. MOBILE DRAWER */
+.mobile-drawer {
+  @apply fixed top-0 left-0 h-full w-80 max-w-[80vw] bg-background shadow-xl z-50;
+}
+
+/* 15. MOBILE MODAL */
+.mobile-modal {
+  @apply fixed inset-0 z-50 flex items-center justify-center p-4;
+}
+
+.mobile-modal-content {
+  @apply w-full max-w-md bg-background rounded-lg shadow-xl border;
+}
+
+/* ===== ACCESSIBILITY ENHANCEMENTS ===== */
+
+/* High Contrast Support */
+@media (prefers-contrast: high) {
+  .high-contrast-text {
+    @apply text-black dark:text-white;
+  }
+  
+  .high-contrast-border {
+    @apply border-2 border-black dark:border-white;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .reduced-motion {
+    @apply transition-none;
+  }
+}
+
+/* Dark Mode Optimizations */
+@media (prefers-color-scheme: dark) {
+  .dark-optimized {
+    @apply bg-gray-900 text-white;
+  }
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+
+/* Contain Layout Shift */
+.mobile-stable-layout {
+  @apply contain-layout;
+}
+
+/* Optimize Images */
+.mobile-optimized-img {
+  @apply w-full h-auto object-cover;
+}
+
+/* ===== SPECIFIC COMPONENT ENHANCEMENTS ===== */
+
+/* Goal Cards */
+.goal-card-mobile {
+  @apply mobile-card mobile-card-content;
+}
+
+.goal-card-actions {
+  @apply flex flex-col sm:flex-row gap-2 mt-3;
+}
+
+/* Stats Display */
+.stats-grid-mobile {
+  @apply mobile-grid-2;
+}
+
+.stat-item-mobile {
+  @apply p-3 sm:p-4 bg-card rounded-lg border;
+}
+
+/* Form Elements */
+.form-group-mobile {
+  @apply space-y-2;
+}
+
+.form-label-mobile {
+  @apply text-sm font-medium text-foreground;
+}
+
+/* Progress Indicators */
+.progress-bar-mobile {
+  @apply h-2 sm:h-3 bg-muted rounded-full overflow-hidden;
+}
+
+.progress-fill-mobile {
+  @apply h-full bg-primary transition-all duration-300;
+}
+
+/* Loading States */
+.loading-spinner-mobile {
+  @apply w-8 h-8 sm:w-10 sm:h-10;
+}
+
+/* Error States */
+.error-message-mobile {
+  @apply p-3 sm:p-4 bg-destructive/10 border border-destructive/20 rounded-lg;
+}
+
+/* Success States */
+.success-message-mobile {
+  @apply p-3 sm:p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg;
+}
+
+/* ===== MOBILE-SPECIFIC UTILITIES ===== */
+
+/* Prevent zoom on iOS */
+.prevent-zoom {
+  @apply text-base;
+  font-size: 16px;
+}
+
+/* Safe area for notched phones */
+.safe-area-inset {
+  @apply pt-safe-area-inset-top pb-safe-area-inset-bottom;
+}
+
+/* Better touch feedback */
+.touch-feedback {
+  @apply active:scale-95 active:bg-muted;
+}
+
+/* Mobile gestures */
+.swipeable {
+  @apply touch-pan-y;
+}
+
+/* Mobile viewport handling */
+.mobile-viewport {
+  @apply min-h-screen overflow-x-hidden;
+}
+
+/* ===== TESTING AND DEBUGGING ===== */
+
+/* Mobile viewport indicator */
+.mobile-indicator {
+  @apply fixed bottom-4 right-4 bg-primary text-primary-foreground px-2 py-1 rounded text-xs;
+}
+
+/* Mobile breakpoint indicator */
+.breakpoint-indicator {
+  @apply fixed top-4 right-4 bg-blue-500 text-white px-2 py-1 rounded text-xs;
+}
+
+/* ===== IMPLEMENTATION NOTES ===== */
+
+/*
+1. Always test on real devices, not just emulators
+2. Use Chrome DevTools Device Mode for testing
+3. Test with both touch and mouse interactions
+4. Verify accessibility with screen readers
+5. Test performance on slower connections
+6. Ensure all interactive elements meet WCAG AA standards
+7. Test in both portrait and landscape orientations
+8. Verify proper focus management
+9. Test with different screen sizes and densities
+10. Ensure proper color contrast ratios (4.5:1 minimum)
+*/
+
+/* ===== COLOR CONTRAST OPTIMIZATIONS ===== */
+
+/* Enhanced contrast for better readability */
+.text-high-contrast {
+  @apply text-foreground;
+  color: oklch(from var(--foreground) l / 0.8);
+}
+
+.text-muted-high-contrast {
+  @apply text-muted-foreground;
+  color: oklch(from var(--muted-foreground) l / 0.7);
+}
+
+/* Border contrast improvements */
+.border-high-contrast {
+  @apply border-border;
+  border-color: oklch(from var(--border) l * 1.2);
+}
+
+/* Button contrast improvements */
+.btn-primary-high-contrast {
+  @apply bg-primary text-primary-foreground;
+  background: oklch(from var(--primary) c * 1.1);
+}
+
+.btn-secondary-high-contrast {
+  @apply bg-secondary text-secondary-foreground;
+  background: oklch(from var(--secondary) l * 0.95);
+}

@@ -84,7 +84,15 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <head>
-          <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
+          <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover" />
+          <meta name="theme-color" content="#000000" />
+          <meta name="apple-mobile-web-app-capable" content="yes" />
+          <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+          <meta name="apple-mobile-web-app-title" content="GoalPlanner Pro" />
+          <meta name="mobile-web-app-capable" content="yes" />
+          <meta name="application-name" content="GoalPlanner Pro" />
+          <meta name="msapplication-TileColor" content="#000000" />
+          <meta name="msapplication-config" content="/browserconfig.xml" />
           <link rel="icon" href="/icon.svg" type="image/svg+xml" />
           <link rel="icon" href="/icon.png" type="image/png" />
           <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
