@@ -1,9 +1,10 @@
 import { notFound, redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
-import { users, goals, checkIns } from '@/lib/db/schema';
+import { goals, checkIns } from '@/lib/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { PublicGoalView } from '@/components/public/PublicGoalView';
+import { findUserByIdentifier } from '@/lib/user-utils';
 
 export async function generateMetadata({ 
   params 
@@ -12,9 +13,8 @@ export async function generateMetadata({
 }) {
   const { username, slug } = await params;
   
-  const user = await db.query.users.findFirst({
-    where: eq(users.username, username),
-  });
+  // Find user using multiple fallback methods
+  const user = await findUserByIdentifier(username);
 
   if (!user) return { title: 'User Not Found' };
 
@@ -37,8 +37,8 @@ export async function generateMetadata({
   const progressPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
 
   return {
-    title: `${goal.title} - ${user.firstName || username}'s Goal`,
-    description: goal.why || `Follow ${user.firstName || username}'s journey towards: ${goal.title}`,
+    title: `${goal.title} - ${user.firstName || user.username || 'User'}'s Goal`,
+    description: goal.why || `Follow ${user.firstName || user.username || 'User'}'s journey towards: ${goal.title}`,
     openGraph: {
       title: goal.title,
       description: `${progressPercent}% complete • ${completedSteps}/${totalSteps} steps`,
@@ -70,10 +70,8 @@ export default async function PublicGoalPage({
   // Get current authenticated user
   const { userId } = await auth();
   
-  // Find user by username
-  const user = await db.query.users.findFirst({
-    where: eq(users.username, username),
-  });
+  // Find user using multiple fallback methods
+  const user = await findUserByIdentifier(username);
 
   if (!user) {
     notFound();

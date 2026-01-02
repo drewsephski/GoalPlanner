@@ -42,12 +42,23 @@ export async function POST(req: Request) {
 
   if (eventType === 'user.created') {
     const { id, email_addresses, username, first_name, last_name, image_url } = evt.data;
+    
+    // Generate username if not provided
+    const email = email_addresses[0]?.email_address || '';
+    let generatedUsername = username;
+    
+    if (!generatedUsername) {
+      // Generate username from email
+      const emailPrefix = email.split('@')[0];
+      const timestamp = Date.now().toString(36);
+      generatedUsername = `${emailPrefix}_${timestamp}`;
+    }
 
     // Create user in database
     await db.insert(users).values({
       id,
-      email: email_addresses[0]?.email_address || '',
-      username: username || null,
+      email,
+      username: generatedUsername,
       firstName: first_name || null,
       lastName: last_name || null,
       imageUrl: image_url || null,
@@ -63,12 +74,32 @@ export async function POST(req: Request) {
 
   if (eventType === 'user.updated') {
     const { id, email_addresses, username, first_name, last_name, image_url } = evt.data;
+    
+    // Get current user to preserve existing username if new one is not provided
+    const currentUser = await db.select({
+      username: users.username,
+    })
+    .from(users)
+    .where(eq(users.id, id))
+    .limit(1)
+    .then((rows) => rows[0] || null);
+    
+    // Generate username if not provided and user doesn't already have one
+    const email = email_addresses[0]?.email_address || '';
+    let updatedUsername = username || currentUser?.username;
+    
+    if (!updatedUsername) {
+      // Generate username from email
+      const emailPrefix = email.split('@')[0];
+      const timestamp = Date.now().toString(36);
+      updatedUsername = `${emailPrefix}_${timestamp}`;
+    }
 
     await db
       .update(users)
       .set({
-        email: email_addresses[0]?.email_address || '',
-        username: username || null,
+        email,
+        username: updatedUsername,
         firstName: first_name || null,
         lastName: last_name || null,
         imageUrl: image_url || null,

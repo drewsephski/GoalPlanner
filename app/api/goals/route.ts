@@ -5,6 +5,7 @@ import { extractStepsFromPlan } from '@/lib/ai/step-extractor';
 import { generateSlug } from '@/lib/utils/slug';
 import { canCreateGoal } from '@/lib/polar/subscription';
 import { eq } from 'drizzle-orm';
+import { ensureUserHasUsername } from '@/lib/user-utils';
 
 // Helper function to create or get anonymous user
 async function getOrCreateAnonymousUser(): Promise<string> {
@@ -152,7 +153,7 @@ export async function POST(req: Request) {
       });
     }
 
-    // Get user info for username
+    // Get user info and ensure username exists
     let user = await db.query.users.findFirst({
       where: eq(users.id, userId),
     });
@@ -164,45 +165,10 @@ export async function POST(req: Request) {
       });
     }
 
-    // Generate username if not set (only for authenticated users)
-    if (!user.username && !isAnonymous) {
-      try {
-        const { currentUser } = await import('@clerk/nextjs/server');
-        const clerkUser = await currentUser();
-        
-        let generatedUsername = null;
-        
-        // Try to get username from Clerk first
-        if (clerkUser?.username) {
-          generatedUsername = clerkUser.username;
-        } else {
-          // Generate a username from email if no username exists
-          const email = clerkUser?.emailAddresses[0]?.emailAddress || user.email;
-          generatedUsername = email.split('@')[0] + '_' + userId.slice(-8);
-        }
-
-        // Update user with generated username
-        await db
-          .update(users)
-          .set({ 
-            username: generatedUsername,
-            updatedAt: new Date(),
-          })
-          .where(eq(users.id, userId));
-
-        // Refetch user with updated username
-        user = await db.query.users.findFirst({
-          where: eq(users.id, userId),
-        });
-      } catch (error) {
-        console.error('Error generating username for authenticated user:', error);
-        // Continue without username - anonymous users already have one
-      }
-    }
-
-    // Anonymous users should already have a username from creation
-    if (!user?.username) {
-      return new Response(JSON.stringify({ error: 'Failed to generate username' }), {
+    // Ensure user has a username
+    user = await ensureUserHasUsername(userId);
+    if (!user) {
+      return new Response(JSON.stringify({ error: 'Failed to ensure user has username' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
