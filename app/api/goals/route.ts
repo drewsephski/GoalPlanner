@@ -97,7 +97,6 @@ export async function POST(req: Request) {
     
     // Check for authenticated user first
     let userId = null;
-    let isAnonymous = false;
     
     try {
       const { auth } = await import('@clerk/nextjs/server');
@@ -110,7 +109,6 @@ export async function POST(req: Request) {
 
     // If no authenticated user, create or get anonymous user
     if (!userId) {
-      isAnonymous = true;
       try {
         const anonymousUserId = await getOrCreateAnonymousUser();
         userId = anonymousUserId;
@@ -206,7 +204,7 @@ export async function POST(req: Request) {
     
     // Create goal in database with fallback mechanism
     console.log('Creating goal in database');
-    let newGoal: any = null;
+    let newGoal: typeof goals.$inferSelect | null = null;
     const goalData = {
       userId,
       title: title.trim(),
@@ -220,6 +218,10 @@ export async function POST(req: Request) {
       visibility: 'private',
     };
     
+    // Try to save steps to database (or skip if fallback)
+    let stepsSaved = false;
+    let isFallbackGoal = false;
+    
     try {
       [newGoal] = await retryDbOperation(() => 
         db.insert(goals).values(goalData).returning()
@@ -229,34 +231,32 @@ export async function POST(req: Request) {
       console.error('Error creating goal in database:', error);
       
       // Fallback: Create a mock goal object
+      isFallbackGoal = true;
       newGoal = {
         ...goalData,
         id: `fallback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         createdAt: new Date(),
         updatedAt: new Date(),
         startedAt: new Date(),
-        isFallback: true,
-      };
+      } as typeof goals.$inferSelect;
       
-      console.log('Using fallback goal object:', newGoal.id);
+      console.log('Using fallback goal object:', newGoal?.id);
       
       // Try to save to fallback storage
       const fallbackGoal = await saveGoalToFallbackStorage(goalData, userId, userWithUsername.username || '', extractedSteps);
-      if (fallbackGoal) {
+      if (fallbackGoal && newGoal) {
         newGoal.id = fallbackGoal.id;
         // Merge the fallback data with the mock goal
         Object.assign(newGoal, fallbackGoal);
       }
     }
 
-    // Try to save steps to database (or skip if fallback)
-    let stepsSaved = false;
-    if (extractedSteps.length > 0 && !newGoal.isFallback) {
+    if (extractedSteps.length > 0 && newGoal && !isFallbackGoal) {
       try {
         await retryDbOperation(() =>
           db.insert(steps).values(
             extractedSteps.map((step, index) => ({
-              goalId: newGoal.id,
+              goalId: newGoal!.id,
               orderNum: index + 1,
               title: step.title,
               description: step.description || null,
@@ -274,10 +274,10 @@ export async function POST(req: Request) {
 
     return new Response(
       JSON.stringify({ 
-        goalId: newGoal.id,
-        slug: newGoal.slug,
+        goalId: newGoal?.id || '',
+        slug: newGoal?.slug || '',
         username: userWithUsername.username,
-        isFallback: newGoal.isFallback || false,
+        isFallback: isFallbackGoal,
         stepsSaved,
       }),
       {

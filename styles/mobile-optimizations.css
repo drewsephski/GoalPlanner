@@ -103,7 +103,13 @@
 
 /* 12. MOBILE SCROLLING */
 .mobile-scroll {
-  @apply overflow-x-auto scrollbar-hide;
+  @apply overflow-x-auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.mobile-scroll::-webkit-scrollbar {
+  display: none;
 }
 
 /* 13. MOBILE OVERLAYS */
@@ -168,7 +174,7 @@
 
 /* Goal Cards */
 .goal-card-mobile {
-  @apply mobile-card mobile-card-content;
+  @apply mx-2 sm:mx-0 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6;
 }
 
 .goal-card-actions {
@@ -177,7 +183,7 @@
 
 /* Stats Display */
 .stats-grid-mobile {
-  @apply mobile-grid-2;
+  @apply grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4;
 }
 
 .stat-item-mobile {
@@ -227,7 +233,8 @@
 
 /* Safe area for notched phones */
 .safe-area-inset {
-  @apply pt-safe-area-inset-top pb-safe-area-inset-bottom;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* Better touch feedback */

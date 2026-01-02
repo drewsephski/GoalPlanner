@@ -17,20 +17,18 @@ import {
     Activity
 } from 'lucide-react';
 import {
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    CartesianGrid,
     Tooltip,
     ResponsiveContainer,
     PieChart as RePieChart,
     Pie,
     Cell,
-    LineChart,
-    Line,
     Area,
-    AreaChart
+    AreaChart,
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid
 } from 'recharts';
 
 interface Goal {

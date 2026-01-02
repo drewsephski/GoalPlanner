@@ -1,1 +1,123 @@
-[]
+[
+  {
+    "userId": "user_37cmyVFZEnW1N6XQuZdDKdBkATL",
+    "title": "Learn Python programming",
+    "slug": "learn-python-programming",
+    "why": "idk",
+    "deadline": "2026-01-23",
+    "timeCommitment": "5 hours/week",
+    "biggestConcern": "idk",
+    "aiPlan": {
+      "overview": "Learning Python is an excellent investment in your future, even if the 'why' isn't crystal clear yet—the skills are highly transferable! We will structure your learning over the next two years, focusing on consistent, manageable chunks of 5 hours per week to build a solid foundation.",
+      "steps": [
+        {
+          "title": "Quick Win: Define Your 'Why' (The Motivation Hack)",
+          "description": "Spend 20 minutes right now brainstorming 3 potential, low-stakes applications for Python (e.g., automating a boring spreadsheet task, analyzing your favorite sports stats, building a simple personal website). Write these down; this addresses your 'idk' motivation by giving you immediate, small targets.",
+          "order": 1
+        },
+        {
+          "title": "Month 1: Setup and Syntax Fundamentals (Weeks 1-4)",
+          "description": "Dedicate 4 sessions (5 hours total) per month to complete an introductory Python course module (e.g., Codecademy Intro or FreeCodeCamp Python tutorial). Focus only on variables, data types, and basic input/output. Goal: Successfully write and run 10 unique, simple scripts.",
+          "order": 2
+        },
+        {
+          "title": "Quarter 1 Milestone: Mastering Control Flow (Months 2-3)",
+          "description": "Focus your 5 hours/week exclusively on understanding and practicing conditional statements (if/else) and loops (for/while). Complete 5 coding challenges on platforms like HackerRank (Easy level) specifically targeting loop logic.",
+          "order": 3
+        },
+        {
+          "title": "Quarter 2 Milestone: Data Structures Deep Dive (Months 4-6)",
+          "description": "Master Lists, Tuples, Dictionaries, and Sets. For every structure, create a mini-project. For example, use a dictionary to track five fictional characters' stats and manipulate that data using loops.",
+          "order": 4
+        },
+        {
+          "title": "Mid-Year Project: Build a Simple Utility (Month 7)",
+          "description": "Take your accumulated knowledge and build one small, functional script that solves a minor organizational task (e.g., a file sorter, a basic calculator using functions, or a text file analyzer). This serves as your first tangible proof of concept.",
+          "order": 5
+        },
+        {
+          "title": "Year 1 Focus: Intermediate Concepts & Libraries (Months 8-12)",
+          "description": "Begin learning about Functions and Object-Oriented Programming (OOP) basics. Simultaneously, start exploring one relevant library based on your initial 'why' step (e.g., Pandas for data, Requests for web interaction). Aim to complete 2 structured tutorials on your chosen library.",
+          "order": 6
+        },
+        {
+          "title": "Final Phase: Project Consolidation and Exploration (Year 2)",
+          "description": "Dedicate the second year (Months 13-24) to working on 3 larger, self-directed projects that build upon each other, integrating OOP and the external library you selected. Use the final months to explore advanced topics like testing or deployment.",
+          "order": 7
+        }
+      ],
+      "timeline": "This plan spans 24 months (until 2026-01-23), utilizing your consistent 5 hours per week to ensure deep learning rather than superficial memorization.",
+      "tips": [
+        "Since your motivation is currently low ('idk'), treat your 5 hours like non-negotiable appointments. If you miss a session, immediately reschedule it within 48 hours. Consistency beats intensity.",
+        "Address the 'biggest concern' (lack of initial direction) by adopting the 'Learn by Doing' method: never spend more than 30 minutes watching a tutorial without immediately pausing to type out and modify the code yourself.",
+        "Use the Pomodoro Technique (25 minutes focused work, 5-minute break) within your 5-hour blocks. This prevents burnout and maximizes retention when your initial purpose isn't fully defined.",
+        "Find a low-stakes accountability partner, perhaps someone else learning a new skill, or just schedule a recurring 10-minute check-in with yourself every Friday to review what you accomplished that week.",
+        "Keep a 'Stupid Questions' document. Every time you get stuck or confused, write down the question. Reviewing this list monthly shows you how far you've progressed, which is a huge motivator."
+      ]
+    },
+    "status": "active",
+    "visibility": "private",
+    "id": "fallback_1767314025624_ysbo20zq0",
+    "username": "drewsepeczi_mjw54w0e",
+    "createdAt": "2026-01-02T00:33:45.624Z",
+    "isFallback": true,
+    "steps": [
+      {
+        "title": "Quick Win: Define Your 'Why' (The Motivation Hack)",
+        "description": "Spend 20 minutes right now brainstorming 3 potential, low-stakes applications for Python (e.g., automating a boring spreadsheet task, analyzing your favorite sports stats, building a simple personal website). Write these down; this addresses your 'idk' motivation by giving you immediate, small targets.",
+        "dueDate": null,
+        "orderNum": 1,
+        "status": "pending",
+        "isFallback": true
+      },
+      {
+        "title": "Month 1: Setup and Syntax Fundamentals (Weeks 1-4)",
+        "description": "Dedicate 4 sessions (5 hours total) per month to complete an introductory Python course module (e.g., Codecademy Intro or FreeCodeCamp Python tutorial). Focus only on variables, data types, and basic input/output. Goal: Successfully write and run 10 unique, simple scripts.",
+        "dueDate": null,
+        "orderNum": 2,
+        "status": "pending",
+        "isFallback": true
+      },
+      {
+        "title": "Quarter 1 Milestone: Mastering Control Flow (Months 2-3)",
+        "description": "Focus your 5 hours/week exclusively on understanding and practicing conditional statements (if/else) and loops (for/while). Complete 5 coding challenges on platforms like HackerRank (Easy level) specifically targeting loop logic.",
+        "dueDate": null,
+        "orderNum": 3,
+        "status": "pending",
+        "isFallback": true
+      },
+      {
+        "title": "Quarter 2 Milestone: Data Structures Deep Dive (Months 4-6)",
+        "description": "Master Lists, Tuples, Dictionaries, and Sets. For every structure, create a mini-project. For example, use a dictionary to track five fictional characters' stats and manipulate that data using loops.",
+        "dueDate": null,
+        "orderNum": 4,
+        "status": "pending",
+        "isFallback": true
+      },
+      {
+        "title": "Mid-Year Project: Build a Simple Utility (Month 7)",
+        "description": "Take your accumulated knowledge and build one small, functional script that solves a minor organizational task (e.g., a file sorter, a basic calculator using functions, or a text file analyzer). This serves as your first tangible proof of concept.",
+        "dueDate": null,
+        "orderNum": 5,
+        "status": "pending",
+        "isFallback": true
+      },
+      {
+        "title": "Year 1 Focus: Intermediate Concepts & Libraries (Months 8-12)",
+        "description": "Begin learning about Functions and Object-Oriented Programming (OOP) basics. Simultaneously, start exploring one relevant library based on your initial 'why' step (e.g., Pandas for data, Requests for web interaction). Aim to complete 2 structured tutorials on your chosen library.",
+        "dueDate": null,
+        "orderNum": 6,
+        "status": "pending",
+        "isFallback": true
+      },
+      {
+        "title": "Final Phase: Project Consolidation and Exploration (Year 2)",
+        "description": "Dedicate the second year (Months 13-24) to working on 3 larger, self-directed projects that build upon each other, integrating OOP and the external library you selected. Use the final months to explore advanced topics like testing or deployment.",
+        "dueDate": null,
+        "orderNum": 7,
+        "status": "pending",
+        "isFallback": true
+      }
+    ]
+  }
+]

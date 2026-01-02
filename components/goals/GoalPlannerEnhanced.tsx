@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,8 +19,7 @@ import {
   Calendar,
   Clock,
   AlertCircle,
-  Heart,
-  Crown
+  Heart
 } from 'lucide-react';
 import { UpgradePrompt } from '@/components/pro/UpgradePrompt';
 

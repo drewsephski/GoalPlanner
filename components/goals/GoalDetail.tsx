@@ -453,12 +453,13 @@ export function GoalDetail({ goal, user }: GoalDetailProps) {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-muted/50 via-background to-card/50">
-            <div className="container mx-auto py-8 px-4 max-w-5xl">
+            <div className="container mx-auto py-4 sm:py-6 lg:py-8 px-4 max-w-5xl">
                 {/* Back Button */}
                 <Link href="/dashboard">
-                    <Button variant="ghost" className="mb-6">
+                    <Button variant="ghost" className="mb-4 sm:mb-6 h-10">
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back to Dashboard
+                        <span className="hidden sm:inline">Back to Dashboard</span>
+                        <span className="sm:hidden">Back</span>
                     </Button>
                 </Link>
 

@@ -16,7 +16,7 @@ type ExtendedGoal = {
   deadline: string | null;
   timeCommitment: string | null;
   biggestConcern: string | null;
-  aiPlan?: {
+  aiPlan: {
     overview: string;
     steps: Array<{
       title: string;
@@ -25,7 +25,7 @@ type ExtendedGoal = {
     }>;
     timeline: string;
     tips: string[];
-  };
+  } | null;
   status: string;
   visibility: string;
   startedAt: Date;
@@ -170,5 +170,5 @@ export default async function GoalPage({ params }: { params: Promise<{ id: strin
     notFound();
   }
 
-  return <GoalDetail goal={goal as any} user={goal.user} />;
+  return <GoalDetail goal={goal as ExtendedGoal} user={goal.user} />;
 }
