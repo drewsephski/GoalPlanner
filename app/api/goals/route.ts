@@ -34,48 +34,35 @@ async function getOrCreateAnonymousUser(): Promise<string> {
   }
 }
 
-// Helper function to save goal to localStorage as fallback
-function saveGoalToLocalStorage(goalData: {
+import { saveFallbackGoal, FallbackGoal } from '@/lib/fallback-storage';
+
+async function saveGoalToFallbackStorage(goalData: Omit<FallbackGoal, 'id' | 'userId' | 'username' | 'createdAt' | 'isFallback' | 'steps'>, userId: string, username: string, extractedSteps: Array<{
   title: string;
-  slug: string;
-  why?: string | null;
-  deadline?: string | null;
-  timeCommitment?: string | null;
-  biggestConcern?: string | null;
-  aiPlan: {
-    overview: string;
-    steps: Array<{
-      title: string;
-      description: string;
-      order: number;
-    }>;
-    timeline: string;
-    tips: string[];
-  };
-  status: string;
-  visibility: string;
-}, userId: string, username: string) {
-  if (typeof window !== 'undefined') {
-    try {
-      const existingGoals = JSON.parse(localStorage.getItem('fallbackGoals') || '[]');
-      const fallbackGoal = {
-        ...goalData,
-        id: `fallback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        userId,
-        username,
-        createdAt: new Date().toISOString(),
+  description: string;
+  dueDate: string | null;
+}> = []) {
+  try {
+    const fallbackGoal = {
+      ...goalData,
+      id: `fallback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      userId,
+      username,
+      createdAt: new Date().toISOString(),
+      isFallback: true,
+      steps: extractedSteps.map((step, index) => ({
+        ...step,
+        orderNum: index + 1,
+        status: 'pending',
         isFallback: true,
-      };
-      existingGoals.push(fallbackGoal);
-      localStorage.setItem('fallbackGoals', JSON.stringify(existingGoals));
-      console.log('Goal saved to localStorage as fallback:', fallbackGoal.id);
-      return fallbackGoal;
-    } catch (error) {
-      console.error('Failed to save goal to localStorage:', error);
-      return null;
-    }
+      })),
+    };
+    await saveFallbackGoal(fallbackGoal);
+    console.log('Goal saved to fallback storage:', fallbackGoal.id);
+    return fallbackGoal;
+  } catch (error) {
+    console.error('Failed to save goal to fallback storage:', error);
+    return null;
   }
-  return null;
 }
 
 // Helper function to retry database operations with exponential backoff
@@ -248,9 +235,12 @@ export async function POST(req: Request) {
       console.log('Using fallback slug:', slug);
     }
 
+    // Extract and save steps from AI plan (with fallback)
+    const extractedSteps = extractStepsFromPlan(aiPlan);
+    
     // Create goal in database with fallback mechanism
     console.log('Creating goal in database');
-    let newGoal: any;
+    let newGoal: any = null;
     const goalData = {
       userId,
       title: title.trim(),
@@ -284,18 +274,18 @@ export async function POST(req: Request) {
       
       console.log('Using fallback goal object:', newGoal.id);
       
-      // Try to save to localStorage if available
-      const localStorageGoal = saveGoalToLocalStorage(goalData, userId, userWithUsername.username || '');
-      if (localStorageGoal) {
-        newGoal.id = localStorageGoal.id;
+      // Try to save to fallback storage
+      const fallbackGoal = await saveGoalToFallbackStorage(goalData, userId, userWithUsername.username || '', extractedSteps);
+      if (fallbackGoal) {
+        newGoal.id = fallbackGoal.id;
+        // Merge the fallback data with the mock goal
+        Object.assign(newGoal, fallbackGoal);
       }
     }
 
-    // Extract and save steps from AI plan (with fallback)
-    const extractedSteps = extractStepsFromPlan(aiPlan);
+    // Try to save steps to database (or skip if fallback)
     let stepsSaved = false;
-    
-    if (extractedSteps.length > 0) {
+    if (extractedSteps.length > 0 && !newGoal.isFallback) {
       try {
         await retryDbOperation(() =>
           db.insert(steps).values(
@@ -313,23 +303,6 @@ export async function POST(req: Request) {
         console.log('Steps successfully saved to database');
       } catch (error) {
         console.error('Error saving steps to database:', error);
-        
-        // Save steps to localStorage as fallback
-        if (typeof window !== 'undefined') {
-          try {
-            const stepsWithGoalId = extractedSteps.map((step, index) => ({
-              ...step,
-              goalId: newGoal.id,
-              orderNum: index + 1,
-              status: 'pending',
-              isFallback: true,
-            }));
-            localStorage.setItem(`fallback_steps_${newGoal.id}`, JSON.stringify(stepsWithGoalId));
-            console.log('Steps saved to localStorage as fallback');
-          } catch (localStorageError) {
-            console.error('Failed to save steps to localStorage:', localStorageError);
-          }
-        }
       }
     }
 
